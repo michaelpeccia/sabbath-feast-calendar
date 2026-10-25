@@ -115,7 +115,9 @@ public class SabbathWidget extends AppWidgetProvider {
                     long start = f.getLong("start");
                     String name = f.getString("name");
                     if (size == LARGE) {
-                        feast = (start <= now ? "Now: " : "Next: ") + name + (start <= now ? "" : " · " + dayTime(start));
+                        feast = start <= now
+                            ? "Now: " + name + " · ends " + dayDate(f.getLong("end"))
+                            : "Next: " + name + " · " + dayDate(start);
                     } else {
                         feast = name + (start <= now ? " · now" : " · " + monthDay(start));
                     }
@@ -158,6 +160,10 @@ public class SabbathWidget extends AppWidgetProvider {
 
     static String dayTime(long t) {
         return new SimpleDateFormat("EEE h:mm a", Locale.getDefault()).format(new Date(t));
+    }
+
+    static String dayDate(long t) {
+        return new SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(new Date(t));
     }
 
     static String monthDay(long t) {
