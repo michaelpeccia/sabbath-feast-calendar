@@ -156,6 +156,20 @@ button.pill {
 .tag.ok { border-color: var(--gold); color: var(--gold); }
 .small-text { font-size: 0.8rem; margin-top: 8px; }
 
+/* Links to other Kingdom Life apps */
+.link-card {
+  display: block;
+  text-decoration: none;
+  border: 1px solid var(--violet);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 4px;
+}
+.link-card:active { opacity: 0.85; }
+.link-title { display: block; color: var(--text); font-weight: 600; }
+.link-sub { display: block; color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+.foot-link { color: var(--violet); font-size: 0.85rem; display: inline-block; margin-bottom: 8px; }
+
 /* Checklists */
 .checks { list-style: none; padding: 0; margin: 8px 0 0; }
 .checks li { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }

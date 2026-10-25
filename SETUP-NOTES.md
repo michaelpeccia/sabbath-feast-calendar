@@ -151,7 +151,19 @@ git push
 
 If Android saved the download as `sabbath-feast-calendar (1).zip`, delete the old one from Download first, or use that name in the `cp` line.
 
-## 6. Check sunset times
+## 6. When the calendar app is in the stores: link it from the study app
+
+The calendar app already links to the study app (Settings tab and the bottom of every screen).
+
+To link back once the calendar is live:
+
+1. Copy the store links:
+   - Google Play: `https://play.google.com/store/apps/details?id=` plus the app ID you choose when you set up the Play listing (for example `com.kingdomlifeministry.sabbathfeast`). Pick the ID carefully, because it can never be changed.
+   - Apple App Store: only if an iPhone version is released later. That needs an Apple developer account ($99 a year) and a Mac to build.
+2. Open a Claude chat and say: "Add Sabbath & Feast Days Calendar store buttons to the study app." Have the links ready.
+3. The study app change goes in the `kingdom-life-app` repo, in `app/www/index.html` and `app/www/app.js`, next to the Connect with us panel. Push it the usual way and GitHub Actions publishes it.
+
+## 7. Check sunset times
 
 Compare the app's Friday sunset with a published sunset table for your city. It should match within 1 to 2 minutes.
 
