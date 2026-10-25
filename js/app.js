@@ -1,4 +1,4 @@
-// Sabbath & Feast Days Calendar, version 0.8
+// Sabbath & Feast Days Calendar, version 0.9
 // Home screen: Sabbath countdown and next appointed time. Feasts tab: the year's dates.
 // The weekly Sabbath runs from sunset Friday to sunset Saturday.
 
@@ -112,7 +112,7 @@
 
   // ---- calendar settings
   const SETTINGS_KEY = "sfc-settings";
-  let settings = { method: "sighted", sight: "jerusalem", yearStart: "equinox", sightings: {}, aviv: {}, fatherName: "YHWH", sonName: "Yahshua" };
+  let settings = { method: "sighted", sight: "jerusalem", yearStart: "equinox", sightings: {}, aviv: {}, fatherName: "YHWH", sonName: "Yahshua", palette: "midnight", widgetTheme: "match" };
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) settings = Object.assign(settings, JSON.parse(raw));
@@ -120,6 +120,50 @@
   function saveSettings() {
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) { /* ignore */ }
   }
+
+
+  // ---- appearance: app colors
+  const PALETTES = [
+    { id: "midnight", name: "Midnight", bg: "#120f2b", accent: "#e3c27a" },
+    { id: "parchment", name: "Parchment", bg: "#f5efe2", accent: "#8a5d0b" },
+    { id: "royal", name: "Royal Blue", bg: "#0a1830", accent: "#ecc76b" },
+    { id: "olive", name: "Olive & Gold", bg: "#15180e", accent: "#dcb75c" },
+    { id: "black", name: "Black & Gold", bg: "#000000", accent: "#e2ba52" }
+  ];
+
+  function applyPalette() {
+    const id = settings.palette || "midnight";
+    if (id === "midnight") delete document.documentElement.dataset.palette;
+    else document.documentElement.dataset.palette = id;
+    const pal = PALETTES.find((x) => x.id === id) || PALETTES[0];
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", pal.bg);
+  }
+
+  function renderSwatches() {
+    $("swatches").innerHTML = PALETTES.map((pal) =>
+      '<button type="button" class="swatch" data-palette="' + pal.id + '" aria-pressed="' + (pal.id === (settings.palette || "midnight")) + '">' +
+      '<span class="swatch-dot" style="background:linear-gradient(135deg,' + pal.bg + ' 50%,' + pal.accent + ' 50%)"></span>' +
+      pal.name + "</button>"
+    ).join("");
+  }
+
+  $("swatches").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-palette]");
+    if (!b) return;
+    settings.palette = b.dataset.palette;
+    saveSettings(); applyPalette(); renderSwatches();
+    if (window.Reminders) Reminders.refresh(); // the widget may follow the app colors
+  });
+  $("sel-widget-theme").addEventListener("change", (e) => {
+    settings.widgetTheme = e.target.value;
+    saveSettings();
+    if (window.Reminders) Reminders.refresh();
+  });
+
+  applyPalette();
+  renderSwatches();
+  $("sel-widget-theme").value = settings.widgetTheme || "match";
 
   function shortDay(date) {
     return date.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric" });

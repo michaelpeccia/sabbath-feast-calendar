@@ -27,6 +27,7 @@
         <!-- Home-screen widget -->
         <receiver
             android:name=".SabbathWidget"
+            android:label="Sabbath &amp; feasts"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -34,6 +35,30 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/sabbath_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".SabbathWidgetSmall"
+            android:label="Sabbath countdown (small)"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sabbath_widget_small_info" />
+        </receiver>
+
+        <receiver
+            android:name=".SabbathWidgetLarge"
+            android:label="Sabbath &amp; feasts (large)"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sabbath_widget_large_info" />
         </receiver>
 
         <provider

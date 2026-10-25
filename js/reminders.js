@@ -148,8 +148,11 @@
   async function updateWidget() {
     const W = plugin("WidgetBridge");
     if (!W || !ctx.getLoc()) return;
+    const st = ctx.getSettings();
+    const theme = !st.widgetTheme || st.widgetTheme === "match" ? (st.palette || "midnight") : st.widgetTheme;
     const data = {
       updated: Date.now(),
+      theme,
       sabbaths: upcomingSabbaths(WIDGET_SABBATHS).map((s) => ({ start: s.start.getTime(), end: s.end.getTime() })),
       feasts: upcomingFeasts(400).slice(0, 12).map((f) => ({ name: f.name, start: f.start.getTime(), end: f.end.getTime() }))
     };

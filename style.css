@@ -6,7 +6,27 @@
   --muted: #b9b2d6;
   --gold: #e3c27a;
   --violet: #8b7cf0;
+  --on-accent: #ffffff;
   color-scheme: dark;
+}
+
+/* Color themes (Settings, Appearance). Midnight above is the default. */
+:root[data-palette="parchment"] {
+  --bg: #f5efe2; --card: #fffaf0; --line: #ddd0b5; --text: #2a2118;
+  --muted: #6b5d4a; --gold: #8a5d0b; --violet: #5546a8; --on-accent: #ffffff;
+  color-scheme: light;
+}
+:root[data-palette="royal"] {
+  --bg: #0a1830; --card: #12274a; --line: #244070; --text: #eef3fb;
+  --muted: #a7b7d3; --gold: #ecc76b; --violet: #6aa6ff; --on-accent: #071226;
+}
+:root[data-palette="olive"] {
+  --bg: #15180e; --card: #222716; --line: #3b4426; --text: #f1efe3;
+  --muted: #bbb99e; --gold: #dcb75c; --violet: #a7c46f; --on-accent: #15180e;
+}
+:root[data-palette="black"] {
+  --bg: #000000; --card: #141414; --line: #2c2c2c; --text: #f5f1e6;
+  --muted: #aaa59b; --gold: #e2ba52; --violet: #d9b866; --on-accent: #000000;
 }
 
 * { box-sizing: border-box; }
@@ -60,7 +80,7 @@ body {
 
 button {
   background: var(--violet);
-  color: #fff;
+  color: var(--on-accent);
   border: 0;
   border-radius: 10px;
   padding: 10px 14px;
@@ -211,3 +231,14 @@ button.back {
 .passage h3 { margin: 0 0 8px; font-size: 0.95rem; color: var(--gold); }
 .passage p { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 1.02rem; line-height: 1.6; }
 .passage sup { color: var(--violet); font-family: system-ui, sans-serif; font-size: 0.65rem; margin-right: 2px; }
+
+/* Appearance */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 8px; }
+button.swatch {
+  display: grid; justify-items: center; gap: 6px;
+  background: var(--bg); color: var(--text);
+  border: 2px solid var(--line); border-radius: 12px;
+  padding: 10px 6px; font-size: 0.8rem;
+}
+button.swatch[aria-pressed="true"] { border-color: var(--gold); }
+.swatch-dot { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(128,128,128,0.4); }

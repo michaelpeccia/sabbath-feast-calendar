@@ -157,6 +157,6 @@ gh run watch
 
 - Each build gets a higher version number automatically, so new APKs install right over the old one and keep saved settings and checklists.
 - **Reminders** (version 0.8 and up): set them in Settings, Reminders. The first time, Android asks to allow notifications: tap Allow. The app sets reminders for the next 12 weeks and refreshes them every time it is opened.
-- **Widget** (version 0.8 and up): long-press an empty spot on your home screen, tap Widgets, find Sabbath & Feast Days, and drag it onto the screen. Open the app once afterward so the widget gets the dates. It updates about every 30 minutes; tap it to open the app.
+- **Widget** (version 0.8 and up): long-press an empty spot on your home screen, tap Widgets, find Sabbath & Feast Days, and drag it onto the screen. There are three sizes: small (countdown only), standard, and large (adds when the Sabbath ends and the next feast's time). Open the app once afterward so the widget gets the dates. Widget colors are in Settings, Appearance. It updates about every 30 minutes; tap it to open the app.
 - The phone's Back button closes the app. Use the Back link at the top of feast pages.
 - The app icon is a placeholder until we make a real one.

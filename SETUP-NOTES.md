@@ -187,4 +187,6 @@ Done in version 0.6: lunar Sabbath, Enoch, Qumran, Zadok priestly and rabbinic c
 
 Done in version 0.8: reminders you choose in Settings (before the Sabbath, at sunset, when it ends, before each feast) and a home-screen widget. These work in the Android app only.
 
+Done in version 0.9: five color themes (Midnight, Parchment, Royal Blue, Olive & Gold, Black & Gold), widget colors that match the app or are picked separately, and three widget sizes (small, standard, large).
+
 1. App icon and Play Store listing
