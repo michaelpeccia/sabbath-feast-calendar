@@ -8,7 +8,7 @@ Keep this file. Every command you need is here.
 - `style.css` : colors and layout
 - `js/sun.js` : sunset calculator (works offline, checked to within 1 minute)
 - `js/astro.js` : new moon, full moon and spring equinox calculator (checked to within a minute)
-- `js/feasts.js` : feast dates for sighted moon, conjunction and full moon calendars
+- `js/feasts.js` : feast and Sabbath dates for all 8 calendars (sighted moon, conjunction, full moon, lunar Sabbath, Enoch, Qumran, Zadok, rabbinic)
 - `js/app.js` : Home, Feasts, feast pages and Settings screens, location, saved settings
 - `js/content.js` : the Sabbath and feast pages (built by the tool below, do not hand-edit)
 - `js/checklists.js` : the starter prep checklists. Edit the lists at the top of this file to change what new users see
@@ -165,5 +165,6 @@ Done in version 0.4: a page for the Sabbath and each feast with "What Scripture 
 
 Done in version 0.5: prep checklists on the Sabbath page and each feast page. Users can check, add and remove items. The Sabbath list starts fresh each week, feast lists each year. Home shows how much Sabbath prep is done.
 
-1. Lunar Sabbath, Enoch, Qumran, Zadok and rabbinic calendars
-2. Reminders and the widget (Android build, done by GitHub Actions or on the PC)
+Done in version 0.6: lunar Sabbath, Enoch, Qumran, Zadok priestly and rabbinic calendars. The Sabbath countdown follows the chosen calendar.
+
+1. Reminders and the widget (Android build, done by GitHub Actions or on the PC)

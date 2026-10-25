@@ -1,4 +1,4 @@
-// Sabbath & Feast Days Calendar, version 0.5
+// Sabbath & Feast Days Calendar, version 0.6
 // Home screen: Sabbath countdown and next appointed time. Feasts tab: the year's dates.
 // The weekly Sabbath runs from sunset Friday to sunset Saturday.
 
@@ -19,23 +19,9 @@
 
   let loc = loadLocation();
 
-  // ---- find the current or next Sabbath
-  function sunsetOn(date) {
-    return Sun.sunset(date.getFullYear(), date.getMonth(), date.getDate(), loc.lat, loc.lon);
-  }
-
+  // ---- find the current or next Sabbath (follows the chosen calendar)
   function findSabbath(now) {
-    // Start from yesterday so a Saturday still finds Friday's start.
-    for (let i = -1; i <= 8; i++) {
-      const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-      if (day.getDay() !== 5) continue; // 5 = Friday
-      const sat = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
-      const start = sunsetOn(day);
-      const end = sunsetOn(sat);
-      if (!start || !end) return null;
-      if (end > now) return { start, end };
-    }
-    return null;
+    return Feasts.findSabbath(now, loc, settings);
   }
 
   // ---- formatting
@@ -239,9 +225,15 @@
     if (!yr) { $("feast-list").innerHTML = '<p class="muted center">No dates for this year.</p>'; return; }
 
     $("yr-title").textContent = "Appointed times " + viewYear + " to " + (viewYear + 1);
-    $("yr-note").textContent = yr.expected
-      ? "Dates marked expected are calculated. Confirm them below as reports come in."
-      : "";
+    let note = "";
+    if (yr.expected) note = "Dates marked expected are calculated. Confirm them below as reports come in.";
+    if (yr.family === "solar") {
+      note = "Year begins at sunset " + shortDay(new Date(yr.yearStartDate.getTime() - 86400000)) + ". 364 days, months of 30, 30 and 31 days.";
+      if (yr.extraDays === 7) note += " A leap week comes after this year.";
+      else if (yr.extraDays > 0) note += " " + yr.extraDays + " day" + (yr.extraDays > 1 ? "s" : "") + " outside the count come after this year.";
+    }
+    if (yr.family === "rabbinic") note = "The calculated Hebrew calendar. Firstfruits uses the rabbinic count (16 Nisan).";
+    $("yr-note").textContent = note;
 
     // Aviv card
     const av = $("aviv-card");
@@ -270,7 +262,7 @@
     }).join("");
 
     // Months, with sighting buttons for the sighted moon
-    const sighted = yr.method === "sighted";
+    const sighted = yr.sightable === true;
     $("months-hint").hidden = !sighted;
     $("month-list").innerHTML = yr.months.map((m) => {
       let note = "";
@@ -282,7 +274,7 @@
           '<button type="button" class="pill" data-key="' + m.key + '" data-act="earlier">Seen a day earlier</button>' +
           ((m.shift || m.confirmed) ? '<button type="button" class="pill" data-key="' + m.key + '" data-act="reset">Reset</button>' : "") +
         "</div>";
-      return "<li><span>Month " + m.n + ": begins at sunset " + shortDay(m.start) + note + "</span>" +
+      return "<li><span>Month " + m.n + (m.label ? " (" + m.label + ")" : "") + ": begins at sunset " + shortDay(m.start) + note + "</span>" +
         (sighted ? (m.confirmed ? ' <span class="tag ok">sighted</span>' : expectedTag(true)) : "") +
         buttons + "</li>";
     }).join("");
@@ -295,18 +287,40 @@
     updateSabbathButton();
   }
 
+  const METHOD_NOTES = {
+    sighted: "Months begin with the first visible crescent. Weekly Sabbath on the seventh day (Saturday).",
+    conjunction: "Months begin after the astronomical new moon. Weekly Sabbath on Saturday.",
+    full: "Months begin after the full moon. Weekly Sabbath on Saturday.",
+    lunar: "Months begin with the new moon. The weekly Sabbath falls on days 8, 15, 22 and 29 of each month, so it moves through the week.",
+    enoch: "364-day year from 1 Enoch 72 to 82, four seasons of 91 days. Choose how the year starts.",
+    qumran: "The 364-day priestly calendar of the Dead Sea Scrolls. The year starts on a Wednesday, the fourth day, when the lights were made.",
+    zadok: "The Qumran calendar kept on a 6-year priestly cycle, with a leap week at the start of each cycle (most recently March 19, 2025).",
+    rabbinic: "The fixed Hebrew calendar used by most Jewish congregations, matching published Jewish calendars."
+  };
+
   function syncSettingsUI() {
-    $("sel-method").value = settings.method;
+    const m = settings.method || "sighted";
+    const isMoon = ["sighted", "conjunction", "full", "lunar"].indexOf(m) >= 0;
+    const lunarStart = settings.lunarStart || "sighted";
+    $("sel-method").value = m;
+    $("method-note").textContent = METHOD_NOTES[m] || "";
     $("sel-sight").value = settings.sight;
     $("sel-yearstart").value = settings.yearStart || "equinox";
-    $("sight-wrap").hidden = settings.method !== "sighted";
+    $("sel-lunarstart").value = lunarStart;
+    $("sel-enochstart").value = settings.enochStart || "wed";
+    $("sel-qumranstart").value = settings.qumranStart || "wedBefore";
+    $("sight-wrap").hidden = !(m === "sighted" || (m === "lunar" && lunarStart === "sighted"));
+    $("yearstart-wrap").hidden = !isMoon;
+    $("lunarstart-wrap").hidden = m !== "lunar";
+    $("enochstart-wrap").hidden = m !== "enoch";
+    $("qumranstart-wrap").hidden = m !== "qumran";
     $("sel-father").value = settings.fatherName || "YHWH";
     $("sel-son").value = settings.sonName || "Yahshua";
   }
 
   $("sel-method").addEventListener("change", (e) => {
     settings.method = e.target.value;
-    saveSettings(); syncSettingsUI(); viewYear = null; refreshAll();
+    saveSettings(); syncSettingsUI(); viewYear = null; refreshAll(); tick();
   });
   $("sel-sight").addEventListener("change", (e) => {
     settings.sight = e.target.value;
@@ -315,6 +329,12 @@
   $("sel-yearstart").addEventListener("change", (e) => {
     settings.yearStart = e.target.value;
     saveSettings(); viewYear = null; refreshAll();
+  });
+  [["sel-lunarstart", "lunarStart"], ["sel-enochstart", "enochStart"], ["sel-qumranstart", "qumranStart"]].forEach(([id, key]) => {
+    $(id).addEventListener("change", (e) => {
+      settings[key] = e.target.value;
+      saveSettings(); syncSettingsUI(); viewYear = null; refreshAll(); tick();
+    });
   });
   $("yr-prev").addEventListener("click", () => { if (viewYear !== null) { viewYear--; renderFeastList(); } });
   $("yr-next").addEventListener("click", () => { if (viewYear !== null) { viewYear++; renderFeastList(); } });
