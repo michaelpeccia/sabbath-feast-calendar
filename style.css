@@ -1,0 +1,83 @@
+:root {
+  --bg: #120f2b;
+  --card: #1f1a45;
+  --line: #352d6b;
+  --text: #f2eee3;
+  --muted: #b9b2d6;
+  --gold: #e3c27a;
+  --violet: #8b7cf0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.45;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 16px 32px;
+}
+
+.top { text-align: center; margin: 8px 0 16px; }
+.top h1 { font-size: 1.4rem; margin: 0; color: var(--gold); letter-spacing: 0.02em; }
+.by { margin: 2px 0 0; font-size: 0.85rem; color: var(--muted); }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.card h2 { font-size: 1rem; margin: 0 0 8px; color: var(--gold); }
+
+.countdown { text-align: center; padding: 24px 16px; }
+.label { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.timer {
+  margin: 6px 0;
+  font-size: 2.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+.when { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.countdown.in-sabbath { border-color: var(--gold); }
+.countdown.in-sabbath .timer { color: var(--gold); }
+
+.times { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; }
+.times dt { color: var(--muted); }
+.times dd { margin: 0; text-align: right; }
+
+.muted { color: var(--muted); margin: 0 0 10px; }
+
+button {
+  background: var(--violet);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 1rem;
+  width: 100%;
+}
+button:active { opacity: 0.85; }
+
+details { margin-top: 12px; }
+summary { color: var(--muted); cursor: pointer; }
+.manual { display: grid; gap: 8px; margin-top: 10px; }
+.manual label { display: grid; gap: 4px; font-size: 0.9rem; color: var(--muted); }
+.manual input {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.foot { text-align: center; color: var(--muted); font-size: 0.75rem; margin-top: 20px; }
