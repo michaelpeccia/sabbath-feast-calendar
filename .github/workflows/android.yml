@@ -41,7 +41,7 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
           echo "KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
 
-      - name: Build the APK
+      - name: Build the APK (and the App Bundle for Google Play)
         working-directory: android
         env:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -50,7 +50,7 @@ jobs:
         run: |
           chmod +x gradlew
           if [ "$HAS_KEY" = "true" ]; then
-            ./gradlew assembleRelease --no-daemon
+            ./gradlew assembleRelease bundleRelease --no-daemon
           else
             ./gradlew assembleDebug --no-daemon
           fi
@@ -60,13 +60,24 @@ jobs:
           mkdir -p out
           if [ "$HAS_KEY" = "true" ]; then
             cp android/app/build/outputs/apk/release/app-release.apk "out/sabbath-feast-days-build-${VERSION_CODE}.apk"
+            mkdir -p bundle
+            cp android/app/build/outputs/bundle/release/app-release.aab "bundle/sabbath-feast-days-build-${VERSION_CODE}.aab"
           else
             cp android/app/build/outputs/apk/debug/app-debug.apk "out/sabbath-feast-days-build-${VERSION_CODE}-debug.apk"
           fi
           ls -l out
+          ls -l bundle 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         with:
           name: sabbath-feast-apk
           path: out/*.apk
+          retention-days: 30
+
+      # The App Bundle is what you upload to Google Play Console.
+      - uses: actions/upload-artifact@v4
+        if: env.HAS_KEY == 'true'
+        with:
+          name: sabbath-feast-aab
+          path: bundle/*.aab
           retention-days: 30

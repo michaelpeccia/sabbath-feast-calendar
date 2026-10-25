@@ -122,6 +122,14 @@ Before downloading a newer build, clear the old one:
 rm -r /storage/emulated/0/Download/sabbath-apk
 ```
 
+## Get the App Bundle for Google Play
+
+Each signed build also makes an App Bundle (.aab), which is the file you upload in Play Console:
+
+```
+gh run download --name sabbath-feast-aab -D /storage/emulated/0/Download/sabbath-aab
+```
+
 ## If the build fails
 
 See your recent builds (✓ = worked, X = failed):
