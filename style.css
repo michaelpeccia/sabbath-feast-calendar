@@ -138,3 +138,19 @@ button.small { width: 44px; padding: 6px 0; font-size: 1.3rem; }
 .big-name { font-size: 1.15rem; margin: 0 0 4px; }
 .plain { list-style: none; padding: 0; margin: 10px 0 0; }
 .plain li { padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 0.9rem; }
+.months li { padding: 10px 0; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+button.pill {
+  width: auto;
+  padding: 7px 12px;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--violet);
+  color: var(--text);
+}
+.watch { border-color: var(--violet); }
+.watch p { margin: 0; }
+.tag.ok { border-color: var(--gold); color: var(--gold); }
+.small-text { font-size: 0.8rem; margin-top: 8px; }

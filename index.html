@@ -22,6 +22,15 @@
         <p class="when" id="cd-when">Set your location to start</p>
       </section>
 
+      <section class="card watch" id="watch-card" hidden>
+        <h2>New moon watch</h2>
+        <p id="watch-text"></p>
+        <div class="pills">
+          <button type="button" class="pill" id="watch-seen">Seen</button>
+          <button type="button" class="pill" id="watch-not">Not seen: move a day</button>
+        </div>
+      </section>
+
       <section class="card" id="week-card" hidden>
         <h2>This week</h2>
         <dl class="times">
@@ -68,6 +77,12 @@
               <option value="local">My location</option>
             </select>
           </label>
+          <label>How the year starts
+            <select id="sel-yearstart">
+              <option value="equinox">Spring equinox rule</option>
+              <option value="aviv">Aviv barley reports</option>
+            </select>
+          </label>
         </div>
       </section>
 
@@ -77,18 +92,26 @@
         <button type="button" class="small" id="yr-next" aria-label="Next year">&rsaquo;</button>
       </div>
       <p class="muted center" id="yr-note"></p>
+
+      <section class="card watch" id="aviv-card" hidden>
+        <h2>Aviv barley</h2>
+        <p id="aviv-status"></p>
+        <div class="pills" id="aviv-buttons"></div>
+      </section>
+
       <div id="feast-list"></div>
 
       <section class="card">
         <details>
-          <summary>New moons this year</summary>
-          <ul class="plain" id="newmoon-list"></ul>
+          <summary>Months and new moon sightings</summary>
+          <p class="muted small-text" id="months-hint">Tap Seen once the crescent is reported. Tap Not seen to move that month a day later. Every feast in that month moves with it.</p>
+          <ul class="plain months" id="month-list"></ul>
         </details>
       </section>
     </div>
 
     <footer class="foot">
-      Times are calculated on your phone. Version 0.2
+      Times are calculated on your phone. Version 0.3
     </footer>
   </main>
 

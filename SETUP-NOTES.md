@@ -139,8 +139,9 @@ Compare the app's Friday sunset with a published sunset table for your city. It 
 
 Done in version 0.2: Feasts tab with sighted moon (default), conjunction and full moon dates, and the next appointed time on Home.
 
-1. "Moon sighted / Not sighted" buttons and an aviv setting for the year start
-2. Feast pages with Scripture
-3. Name pickers
-4. Lunar Sabbath, Enoch, Qumran, Zadok and rabbinic calendars
-5. Reminders and the widget (Android build, done by GitHub Actions or on the PC)
+Done in version 0.3: "Seen / Not seen" buttons for each month, a New moon watch card on Home on sighting evenings, and an aviv barley setting for the year start. Choices are saved on the phone.
+
+1. Feast pages with Scripture
+2. Name pickers
+3. Lunar Sabbath, Enoch, Qumran, Zadok and rabbinic calendars
+4. Reminders and the widget (Android build, done by GitHub Actions or on the PC)

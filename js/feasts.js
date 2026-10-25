@@ -1,6 +1,12 @@
 // Feast calendar for the moon-based methods (sighted moon, conjunction, full moon).
 // A biblical day runs from sunset to sunset. "Day n" below means the daylight date
 // of day n; it begins at sunset the evening before.
+//
+// User adjustments (saved in settings):
+//   settings.sightings[moonKey] = { shift: -1|0|1|2, confirmed: true|false }
+//     moonKey is the UTC date of the new moon, e.g. "2026-09-11". Sighted moon only.
+//   settings.yearStart = "equinox" | "aviv"
+//   settings.aviv[gYear] = "confirmed" | "next"   (aviv mode only)
 
 (function () {
   const JERUSALEM = { lat: 31.7683, lon: 35.2137 };
@@ -16,19 +22,34 @@
   function sameOrAfter(a, b) {
     return a.y !== b.y ? a.y > b.y : a.m !== b.m ? a.m > b.m : a.d >= b.d;
   }
+  function moonKey(moon) { return moon.toISOString().slice(0, 10); }
 
-  // The evening the month begins (as a calendar date), for one new or full moon.
-  function monthEvening(moon, method, settings, loc) {
+  // The calculated evening the month begins (as a calendar date), before any user adjustment.
+  function baseEvening(moon, method, settings, loc) {
     const place = method === "sighted" && settings.sight !== "local" ? JERUSALEM : loc;
     const minAge = method === "sighted" ? SIGHT_AGE_HOURS * HOUR : 0;
-    let ymd = { y: moon.getUTCFullYear(), m: moon.getUTCMonth(), d: moon.getUTCDate() - 1 };
-    ymd = addDays(ymd, 0);
+    let ymd = addDays({ y: moon.getUTCFullYear(), m: moon.getUTCMonth(), d: moon.getUTCDate() }, -1);
     for (let i = 0; i < 5; i++) {
       const ss = sunsetAt(ymd, place);
       if (ss && ss - moon >= minAge) return ymd;
       ymd = addDays(ymd, 1);
     }
     return ymd;
+  }
+
+  // One month: calculated evening plus the user's sighting adjustment.
+  function makeMonth(moon, method, settings, loc) {
+    const key = moonKey(moon);
+    const adj = (method === "sighted" && settings.sightings && settings.sightings[key]) || {};
+    const shift = adj.shift || 0;
+    const base = baseEvening(moon, method, settings, loc);
+    return {
+      key,
+      moon,
+      evening: addDays(base, shift),
+      shift,
+      confirmed: method !== "sighted" || !!adj.confirmed
+    };
   }
 
   // Builds the biblical year that begins in the spring of gregorian year gYear.
@@ -39,30 +60,42 @@
     const eq = Astro.marchEquinox(gYear);
     const eqYmd = { y: eq.getUTCFullYear(), m: eq.getUTCMonth(), d: eq.getUTCDate() };
 
-    // Month 1: the first month whose 14th day (Passover) falls on or after the spring equinox.
+    // Month 1 by the equinox rule: the first month whose 14th day (Passover)
+    // falls on or after the spring equinox.
     let first = -1;
     for (let i = 0; i < moons.length; i++) {
-      const ev = monthEvening(moons[i], method, settings, loc);
+      const ev = makeMonth(moons[i], method, settings, loc).evening;
       if (sameOrAfter(addDays(ev, 14), eqYmd)) { first = i; break; }
     }
     if (first < 0) return null;
 
+    // Aviv mode: the user can move month 1 a month later when the barley is not aviv.
+    const avivMode = settings.yearStart === "aviv";
+    const avivState = avivMode && settings.aviv ? settings.aviv[gYear] : undefined;
+    if (avivState === "next") first += 1;
+    const yearStartConfirmed = !avivMode || avivState === "confirmed" || avivState === "next";
+
     const months = [];
     for (let n = 1; n <= 13 && first + n - 1 < moons.length; n++) {
-      const ev = monthEvening(moons[first + n - 1], method, settings, loc);
-      months.push({ n, evening: ev });
+      const mo = makeMonth(moons[first + n - 1], method, settings, loc);
+      mo.n = n;
+      mo.start = sunsetAt(mo.evening, loc);
+      mo.date = toDate(addDays(mo.evening, 1));
+      months.push(mo);
     }
+    if (months.length < 7) return null;
 
     // A span of days in a month -> start and end sunsets at the user's location.
-    function span(monthIdx, firstDay, lastDay) {
-      const ev = months[monthIdx - 1].evening;
-      const startEve = addDays(ev, firstDay - 1);
-      const lastDaylight = addDays(ev, lastDay);
+    function span(monthNum, firstDay, lastDay) {
+      const mo = months[monthNum - 1];
+      const startEve = addDays(mo.evening, firstDay - 1);
+      const lastDaylight = addDays(mo.evening, lastDay);
       return {
         start: sunsetAt(startEve, loc),
         end: sunsetAt(lastDaylight, loc),
-        firstDate: toDate(addDays(ev, firstDay)),
-        lastDate: toDate(lastDaylight)
+        firstDate: toDate(addDays(mo.evening, firstDay)),
+        lastDate: toDate(lastDaylight),
+        expected: !mo.confirmed || !yearStartConfirmed
       };
     }
 
@@ -82,20 +115,18 @@
     // Shavuot: count fifty days from Firstfruits (Leviticus 23:15-16)
     add("shavuot", "Shavuot (Weeks)", "Leviticus 23:15-21", span(1, ffDay + 49, ffDay + 49), "50 days from Firstfruits");
 
-    if (months.length >= 7) {
-      add("trumpets", "Yom Teruah (Trumpets)", "Leviticus 23:24-25", span(7, 1, 1), "Month 7, day 1");
-      add("atonement", "Yom Kippur (Atonement)", "Leviticus 23:27-32", span(7, 10, 10), "Month 7, day 10");
-      add("tabernacles", "Sukkot (Tabernacles)", "Leviticus 23:34-36", span(7, 15, 21), "Month 7, days 15 to 21");
-      add("eighthday", "The Eighth Day", "Leviticus 23:36", span(7, 22, 22), "Month 7, day 22");
-    }
+    add("trumpets", "Yom Teruah (Trumpets)", "Leviticus 23:24-25", span(7, 1, 1), "Month 7, day 1");
+    add("atonement", "Yom Kippur (Atonement)", "Leviticus 23:27-32", span(7, 10, 10), "Month 7, day 10");
+    add("tabernacles", "Sukkot (Tabernacles)", "Leviticus 23:34-36", span(7, 15, 21), "Month 7, days 15 to 21");
+    add("eighthday", "The Eighth Day", "Leviticus 23:36", span(7, 22, 22), "Month 7, day 22");
 
-    const newMoons = months.map((mo) => ({
-      n: mo.n,
-      start: sunsetAt(mo.evening, loc),
-      date: toDate(addDays(mo.evening, 1))
-    }));
-
-    return { gYear, method, expected: method === "sighted", feasts, newMoons };
+    return {
+      gYear, method, avivMode, avivState, yearStartConfirmed,
+      equinox: eq,
+      expected: feasts.some((f) => f.expected),
+      feasts,
+      months
+    };
   }
 
   // The next appointed time that has not ended yet.
@@ -105,18 +136,29 @@
       const yr = buildYear(gy, loc, settings);
       if (!yr) continue;
       const f = yr.feasts.find((x) => x.end > now);
-      if (f) return Object.assign({ expected: yr.expected, gYear: gy }, f);
+      if (f) return Object.assign({ gYear: gy }, f);
     }
     return null;
   }
 
-  // The biblical year that is current right now (the latest one already begun).
-  function currentYear(now, loc, settings) {
+  // Sighted moon only: an unconfirmed month whose crescent is due this evening or was due last evening.
+  function sightingDue(now, loc, settings) {
+    if ((settings.method || "sighted") !== "sighted") return null;
+    const today = { y: now.getFullYear(), m: now.getMonth(), d: now.getDate() };
+    const yesterday = addDays(today, -1);
+    const same = (a, b) => a.y === b.y && a.m === b.m && a.d === b.d;
     const y = now.getFullYear();
-    const thisYear = buildYear(y, loc, settings);
-    if (thisYear && thisYear.newMoons[0].start <= now) return thisYear;
-    return buildYear(y - 1, loc, settings);
+    for (const gy of [y - 1, y]) {
+      const yr = buildYear(gy, loc, settings);
+      if (!yr) continue;
+      for (const mo of yr.months) {
+        if (mo.confirmed) continue;
+        if (same(mo.evening, today)) return Object.assign({ when: "tonight", gYear: gy }, mo);
+        if (same(mo.evening, yesterday)) return Object.assign({ when: "last night", gYear: gy }, mo);
+      }
+    }
+    return null;
   }
 
-  window.Feasts = { buildYear, nextFeast, currentYear };
+  window.Feasts = { buildYear, nextFeast, sightingDue };
 })();

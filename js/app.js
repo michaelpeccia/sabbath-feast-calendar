@@ -1,4 +1,4 @@
-// Sabbath & Feast Days Calendar, version 0.2
+// Sabbath & Feast Days Calendar, version 0.3
 // Home screen: Sabbath countdown and next appointed time. Feasts tab: the year's dates.
 // The weekly Sabbath runs from sunset Friday to sunset Saturday.
 
@@ -96,8 +96,7 @@
     tick();
     // Location changes refresh the feast dates too.
     viewYear = null;
-    renderNextFeast();
-    renderFeastList();
+    refreshAll();
   }
 
   // ---- buttons
@@ -126,7 +125,7 @@
 
   // ---- calendar settings
   const SETTINGS_KEY = "sfc-settings";
-  let settings = { method: "sighted", sight: "jerusalem" };
+  let settings = { method: "sighted", sight: "jerusalem", yearStart: "equinox", sightings: {}, aviv: {} };
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) settings = Object.assign(settings, JSON.parse(raw));
@@ -170,12 +169,49 @@
       '<p class="daylabel muted">' + f.dayLabel + " &middot; " + f.ref + "</p>";
   }
 
+  // ---- home: new moon watch (sighted moon only)
+  function renderWatch() {
+    const card = $("watch-card");
+    if (!loc) { card.hidden = true; return; }
+    const due = Feasts.sightingDue(new Date(), loc, settings);
+    if (!due) { card.hidden = true; return; }
+    card.hidden = false;
+    const from = settings.sight === "local" ? "from your location" : "from Jerusalem";
+    $("watch-text").textContent = due.when === "tonight"
+      ? "The crescent for month " + due.n + " is expected " + from + " at sunset tonight. Was it seen?"
+      : "The crescent for month " + due.n + " was expected " + from + " at sunset last night. Was it seen?";
+    $("watch-seen").dataset.key = due.key;
+    $("watch-not").dataset.key = due.key;
+  }
+
+  // ---- sighting and aviv changes
+  function changeSighting(key, action) {
+    settings.sightings = settings.sightings || {};
+    const cur = settings.sightings[key] || { shift: 0, confirmed: false };
+    if (action === "seen") cur.confirmed = true;
+    if (action === "later") { cur.shift = Math.min(2, (cur.shift || 0) + 1); cur.confirmed = false; }
+    if (action === "earlier") { cur.shift = Math.max(-1, (cur.shift || 0) - 1); cur.confirmed = true; }
+    if (action === "reset") { delete settings.sightings[key]; }
+    else settings.sightings[key] = cur;
+    saveSettings();
+    refreshAll();
+  }
+
+  function changeAviv(gYear, action) {
+    settings.aviv = settings.aviv || {};
+    if (action === "reset") delete settings.aviv[gYear];
+    else settings.aviv[gYear] = action; // "confirmed" or "next"
+    saveSettings();
+    refreshAll();
+  }
+
   // ---- feasts tab
   let viewYear = null;
 
   function renderFeastList() {
     if (!loc) {
       $("feast-list").innerHTML = '<p class="muted center">Set your location on the Home tab first.</p>';
+      $("aviv-card").hidden = true;
       return;
     }
     const now = new Date();
@@ -189,41 +225,92 @@
 
     $("yr-title").textContent = "Appointed times " + viewYear + " to " + (viewYear + 1);
     $("yr-note").textContent = yr.expected
-      ? "Dates are expected from astronomy until the crescent is sighted."
+      ? "Dates marked expected are calculated. Confirm them below as reports come in."
       : "";
+
+    // Aviv card
+    const av = $("aviv-card");
+    av.hidden = !yr.avivMode;
+    if (yr.avivMode) {
+      const m1 = yr.months[0];
+      let status;
+      if (yr.avivState === "confirmed") status = "Aviv confirmed. Month 1 begins at sunset " + shortDay(m1.start) + ".";
+      else if (yr.avivState === "next") status = "Not aviv, so month 1 moved a month later. It begins at sunset " + shortDay(m1.start) + ".";
+      else status = "Month 1 is expected to begin at sunset " + shortDay(m1.start) + ". Confirm once the barley reports are in.";
+      $("aviv-status").textContent = status;
+      $("aviv-buttons").innerHTML = yr.avivState
+        ? '<button type="button" class="pill" data-aviv="reset">Undo</button>'
+        : '<button type="button" class="pill" data-aviv="confirmed">Aviv confirmed</button>' +
+          '<button type="button" class="pill" data-aviv="next">Not aviv: a month later</button>';
+    }
 
     $("feast-list").innerHTML = yr.feasts.map((f) => {
       const cls = f.end <= now ? "past" : (f.start <= now ? "now" : "");
       return '<section class="card feast ' + cls + '">' +
-        '<div class="feast-head"><h3>' + f.name + expectedTag(yr.expected) + "</h3>" +
+        '<div class="feast-head"><h3>' + f.name + expectedTag(f.expected) + "</h3>" +
         '<span class="ref">' + f.ref + "</span></div>" +
         '<p class="span">' + spanText(f) + "</p>" +
         '<p class="daylabel">' + f.dayLabel + "</p></section>";
     }).join("");
 
-    $("newmoon-list").innerHTML = yr.newMoons.map((m) =>
-      "<li>Month " + m.n + ": begins at sunset " + shortDay(m.start) + "</li>"
-    ).join("");
+    // Months, with sighting buttons for the sighted moon
+    const sighted = yr.method === "sighted";
+    $("months-hint").hidden = !sighted;
+    $("month-list").innerHTML = yr.months.map((m) => {
+      let note = "";
+      if (m.shift) note += " (moved " + (m.shift > 0 ? "+" : "") + m.shift + " day" + (Math.abs(m.shift) > 1 ? "s" : "") + ")";
+      const buttons = !sighted ? "" :
+        '<div class="pills">' +
+          (m.confirmed ? "" : '<button type="button" class="pill" data-key="' + m.key + '" data-act="seen">Seen</button>') +
+          '<button type="button" class="pill" data-key="' + m.key + '" data-act="later">Not seen: +1 day</button>' +
+          '<button type="button" class="pill" data-key="' + m.key + '" data-act="earlier">Seen a day earlier</button>' +
+          ((m.shift || m.confirmed) ? '<button type="button" class="pill" data-key="' + m.key + '" data-act="reset">Reset</button>' : "") +
+        "</div>";
+      return "<li><span>Month " + m.n + ": begins at sunset " + shortDay(m.start) + note + "</span>" +
+        (sighted ? (m.confirmed ? ' <span class="tag ok">sighted</span>' : expectedTag(true)) : "") +
+        buttons + "</li>";
+    }).join("");
+  }
+
+  function refreshAll() {
+    renderFeastList();
+    renderNextFeast();
+    renderWatch();
   }
 
   function syncSettingsUI() {
     $("sel-method").value = settings.method;
     $("sel-sight").value = settings.sight;
+    $("sel-yearstart").value = settings.yearStart || "equinox";
     $("sight-wrap").hidden = settings.method !== "sighted";
   }
 
   $("sel-method").addEventListener("change", (e) => {
     settings.method = e.target.value;
-    saveSettings(); syncSettingsUI(); viewYear = null;
-    renderFeastList(); renderNextFeast();
+    saveSettings(); syncSettingsUI(); viewYear = null; refreshAll();
   });
   $("sel-sight").addEventListener("change", (e) => {
     settings.sight = e.target.value;
-    saveSettings(); viewYear = null;
-    renderFeastList(); renderNextFeast();
+    saveSettings(); viewYear = null; refreshAll();
+  });
+  $("sel-yearstart").addEventListener("change", (e) => {
+    settings.yearStart = e.target.value;
+    saveSettings(); viewYear = null; refreshAll();
   });
   $("yr-prev").addEventListener("click", () => { if (viewYear !== null) { viewYear--; renderFeastList(); } });
   $("yr-next").addEventListener("click", () => { if (viewYear !== null) { viewYear++; renderFeastList(); } });
+
+  // Buttons inside lists (added after the page loads)
+  $("month-list").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-act]");
+    if (b) changeSighting(b.dataset.key, b.dataset.act);
+  });
+  $("aviv-buttons").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-aviv]");
+    if (b && viewYear !== null) changeAviv(viewYear, b.dataset.aviv);
+  });
+  $("watch-seen").addEventListener("click", (e) => changeSighting(e.target.dataset.key, "seen"));
+  $("watch-not").addEventListener("click", (e) => changeSighting(e.target.dataset.key, "later"));
 
   // ---- tabs
   document.querySelectorAll(".tab").forEach((btn) => {
@@ -239,6 +326,7 @@
   showLocation();
   tick();
   renderNextFeast();
+  renderWatch();
   setInterval(tick, 1000);
-  setInterval(renderNextFeast, 60000);
+  setInterval(() => { renderNextFeast(); renderWatch(); }, 60000);
 })();
