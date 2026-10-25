@@ -1,4 +1,4 @@
-// Sabbath & Feast Days Calendar, version 0.4
+// Sabbath & Feast Days Calendar, version 0.5
 // Home screen: Sabbath countdown and next appointed time. Feasts tab: the year's dates.
 // The weekly Sabbath runs from sunset Friday to sunset Saturday.
 
@@ -292,6 +292,7 @@
     renderFeastList();
     renderNextFeast();
     renderWatch();
+    updateSabbathButton();
   }
 
   function syncSettingsUI() {
@@ -350,16 +351,21 @@
 
     // This year's dates for the feast, when we have a location
     let dates = "";
+    const now = new Date();
+    let gy = now.getFullYear();
     if (key === "sabbath") {
       dates = "Every seventh day, from sunset to sunset.";
     } else if (loc) {
-      const now = new Date();
-      const gy = viewYear !== null ? viewYear : (Feasts.nextFeast(now, loc, settings) || { gYear: now.getFullYear() }).gYear;
+      gy = viewYear !== null ? viewYear : (Feasts.nextFeast(now, loc, settings) || { gYear: gy }).gYear;
       const yr = Feasts.buildYear(gy, loc, settings);
       const f = yr && yr.feasts.find((x) => x.key === key);
       if (f) dates = spanText(f) + (f.expected ? " (expected)" : "") + " · " + f.dayLabel;
     }
     $("page-dates").textContent = dates;
+
+    pageKey = key;
+    pageOcc = key === "sabbath" ? sabbathOcc() : "y" + gy;
+    renderChecklist();
 
     $("page-instructs").innerHTML = c.instructs.map((i) =>
       "<li>" + withNames(i.text) + '<span class="ref">' + i.ref + "</span></li>"
@@ -374,8 +380,70 @@
     showView("page");
   }
 
+  // ---- prep checklists
+  let pageKey = null;
+  let pageOcc = null;
+
+  // This week's Sabbath, so the Sabbath list starts fresh each week.
+  function sabbathOcc() {
+    const sab = loc ? findSabbath(new Date()) : null;
+    const d = sab ? sab.start : new Date();
+    return "w" + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+  }
+
+  function escapeHtml(t) {
+    return t.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+  }
+
+  function renderChecklist() {
+    const card = $("check-card");
+    if (!pageKey || !Checklists.has(pageKey)) { card.hidden = true; return; }
+    card.hidden = false;
+    const items = Checklists.get(pageKey, pageOcc);
+    const doneCount = items.filter((i) => i.done).length;
+    $("check-note").textContent = (pageKey === "sabbath" ? "For this week's Sabbath. " : "For this year. ") +
+      doneCount + " of " + items.length + " done.";
+    $("check-list").innerHTML = items.map((i) =>
+      '<li class="' + (i.done ? "done" : "") + '">' +
+      '<label><input type="checkbox" data-check="' + i.id + '"' + (i.done ? " checked" : "") + ">" +
+      "<span>" + escapeHtml(withNames(i.text)) + "</span></label>" +
+      '<button type="button" class="x" data-remove="' + i.id + '" aria-label="Remove">&times;</button></li>'
+    ).join("");
+  }
+
+  function updateSabbathButton() {
+    const items = Checklists.get("sabbath", sabbathOcc());
+    const done = items.filter((i) => i.done).length;
+    $("sabbath-btn").textContent = "Sabbath prep (" + done + " of " + items.length + ") and Scripture";
+  }
+
+  $("check-list").addEventListener("change", (e) => {
+    const box = e.target.closest("input[data-check]");
+    if (!box) return;
+    Checklists.toggle(pageKey, pageOcc, box.dataset.check);
+    renderChecklist(); updateSabbathButton();
+  });
+  $("check-list").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-remove]");
+    if (!b) return;
+    Checklists.remove(pageKey, b.dataset.remove);
+    renderChecklist(); updateSabbathButton();
+  });
+  function addItem() {
+    Checklists.add(pageKey, $("check-input").value);
+    $("check-input").value = "";
+    renderChecklist(); updateSabbathButton();
+  }
+  $("check-add").addEventListener("click", addItem);
+  $("check-input").addEventListener("keydown", (e) => { if (e.key === "Enter") addItem(); });
+  $("check-reset").addEventListener("click", () => {
+    if (!confirm("Put back the starter list? Your own items will be removed.")) return;
+    Checklists.reset(pageKey);
+    renderChecklist(); updateSabbathButton();
+  });
+
   document.addEventListener("click", (e) => {
-    if (e.target.closest("button[data-act], button[data-aviv]")) return;
+    if (e.target.closest("button[data-act], button[data-aviv], #check-card")) return;
     const el = e.target.closest("[data-page]");
     if (el && el.dataset.page) openPage(el.dataset.page);
   });
@@ -401,6 +469,7 @@
   tick();
   renderNextFeast();
   renderWatch();
+  updateSabbathButton();
   setInterval(tick, 1000);
-  setInterval(() => { renderNextFeast(); renderWatch(); }, 60000);
+  setInterval(() => { renderNextFeast(); renderWatch(); updateSabbathButton(); }, 60000);
 })();

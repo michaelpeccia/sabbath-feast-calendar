@@ -37,7 +37,7 @@
           <dt>Sabbath begins</dt><dd id="t-start">-</dd>
           <dt>Sabbath ends</dt><dd id="t-end">-</dd>
         </dl>
-        <div class="pills"><button type="button" class="pill" data-page="sabbath">What Scripture says about the Sabbath</button></div>
+        <div class="pills"><button type="button" class="pill" data-page="sabbath" id="sabbath-btn">Sabbath prep and Scripture</button></div>
       </section>
 
       <section class="card" id="feast-card">
@@ -122,6 +122,17 @@
         <ul class="instructs" id="page-instructs"></ul>
       </section>
 
+      <section class="card" id="check-card" hidden>
+        <h2>Prep checklist</h2>
+        <p class="muted small-text" id="check-note"></p>
+        <ul class="checks" id="check-list"></ul>
+        <div class="add-row">
+          <input id="check-input" type="text" placeholder="Add your own item" maxlength="120">
+          <button type="button" class="pill" id="check-add">Add</button>
+        </div>
+        <button type="button" class="linkish" id="check-reset">Reset to the starter list</button>
+      </section>
+
       <div id="page-passages"></div>
       <p class="muted small-text center">Scripture: World English Bible (public domain), with your chosen names.</p>
     </div>
@@ -159,7 +170,7 @@
     </div>
 
     <footer class="foot">
-      Times are calculated on your phone. Version 0.4
+      Times are calculated on your phone. Version 0.5
     </footer>
   </main>
 
@@ -173,6 +184,7 @@
   <script src="js/astro.js"></script>
   <script src="js/feasts.js"></script>
   <script src="js/content.js"></script>
+  <script src="js/checklists.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

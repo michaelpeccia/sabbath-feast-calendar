@@ -11,6 +11,7 @@ Keep this file. Every command you need is here.
 - `js/feasts.js` : feast dates for sighted moon, conjunction and full moon calendars
 - `js/app.js` : Home, Feasts, feast pages and Settings screens, location, saved settings
 - `js/content.js` : the Sabbath and feast pages (built by the tool below, do not hand-edit)
+- `js/checklists.js` : the starter prep checklists. Edit the lists at the top of this file to change what new users see
 - `tools/build_content.py` : where the "What Scripture instructs" lines live. Scripture is pulled word for word from the World English Bible
 - `tools/web_text.py` : helper that reads the World English Bible data
 
@@ -162,6 +163,7 @@ Done in version 0.3: "Seen / Not seen" buttons for each month, a New moon watch 
 
 Done in version 0.4: a page for the Sabbath and each feast with "What Scripture instructs" and the full passages, plus a Settings tab with the name pickers.
 
-1. Prep checklists
-2. Lunar Sabbath, Enoch, Qumran, Zadok and rabbinic calendars
-3. Reminders and the widget (Android build, done by GitHub Actions or on the PC)
+Done in version 0.5: prep checklists on the Sabbath page and each feast page. Users can check, add and remove items. The Sabbath list starts fresh each week, feast lists each year. Home shows how much Sabbath prep is done.
+
+1. Lunar Sabbath, Enoch, Qumran, Zadok and rabbinic calendars
+2. Reminders and the widget (Android build, done by GitHub Actions or on the PC)
