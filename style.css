@@ -80,4 +80,61 @@ summary { color: var(--muted); cursor: pointer; }
   font-size: 1rem;
 }
 
-.foot { text-align: center; color: var(--muted); font-size: 0.75rem; margin-top: 20px; }
+.foot { text-align: center; color: var(--muted); font-size: 0.75rem; margin: 20px 0 80px; }
+
+select {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+/* Bottom tabs */
+.tabs {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  background: var(--card);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tab {
+  flex: 1;
+  background: none;
+  border-radius: 0;
+  color: var(--muted);
+  padding: 14px 0;
+}
+.tab.active { color: var(--gold); font-weight: 600; }
+
+/* Feast list */
+.yearbar { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 4px; }
+.yearbar h2 { font-size: 1.05rem; margin: 0; color: var(--gold); }
+button.small { width: 44px; padding: 6px 0; font-size: 1.3rem; }
+.center { text-align: center; }
+
+.feast { padding: 14px 16px; }
+.feast.past { opacity: 0.55; }
+.feast.now { border-color: var(--gold); }
+.feast-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.feast h3 { margin: 0; font-size: 1rem; }
+.feast .ref { color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
+.feast .span { margin: 6px 0 0; font-size: 0.9rem; }
+.feast .daylabel { margin: 2px 0 0; color: var(--muted); font-size: 0.8rem; }
+
+.tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--violet);
+  color: var(--violet);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.big-name { font-size: 1.15rem; margin: 0 0 4px; }
+.plain { list-style: none; padding: 0; margin: 10px 0 0; }
+.plain li { padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 0.9rem; }

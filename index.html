@@ -14,47 +14,92 @@
       <p class="by">by Kingdom Life Ministry</p>
     </header>
 
-    <!-- Home: Sabbath countdown -->
-    <section class="card countdown" id="countdown-card">
-      <p class="label" id="cd-label">Sabbath begins in</p>
-      <p class="timer" id="cd-timer">--:--:--</p>
-      <p class="when" id="cd-when">Set your location to start</p>
-    </section>
+    <!-- ===== HOME ===== -->
+    <div class="view" id="view-home">
+      <section class="card countdown" id="countdown-card">
+        <p class="label" id="cd-label">Sabbath begins in</p>
+        <p class="timer" id="cd-timer">--:--:--</p>
+        <p class="when" id="cd-when">Set your location to start</p>
+      </section>
 
-    <section class="card" id="week-card" hidden>
-      <h2>This week</h2>
-      <dl class="times">
-        <dt>Sabbath begins</dt><dd id="t-start">-</dd>
-        <dt>Sabbath ends</dt><dd id="t-end">-</dd>
-      </dl>
-    </section>
+      <section class="card" id="week-card" hidden>
+        <h2>This week</h2>
+        <dl class="times">
+          <dt>Sabbath begins</dt><dd id="t-start">-</dd>
+          <dt>Sabbath ends</dt><dd id="t-end">-</dd>
+        </dl>
+      </section>
 
-    <section class="card" id="feast-card">
-      <h2>Next appointed time</h2>
-      <p class="muted">Feast calendar coming next.</p>
-    </section>
+      <section class="card" id="feast-card">
+        <h2>Next appointed time</h2>
+        <div id="next-feast"><p class="muted">Set your location to see feast dates.</p></div>
+      </section>
 
-    <!-- Location -->
-    <section class="card">
-      <h2>Your location</h2>
-      <p class="muted" id="loc-status">No location set.</p>
-      <button type="button" id="btn-gps">Use my location</button>
-      <details>
-        <summary>Enter it by hand</summary>
+      <section class="card">
+        <h2>Your location</h2>
+        <p class="muted" id="loc-status">No location set.</p>
+        <button type="button" id="btn-gps">Use my location</button>
+        <details>
+          <summary>Enter it by hand</summary>
+          <div class="manual">
+            <label>Latitude <input id="in-lat" type="number" step="0.0001" placeholder="36.1540"></label>
+            <label>Longitude <input id="in-lon" type="number" step="0.0001" placeholder="-95.9928"></label>
+            <button type="button" id="btn-save">Save</button>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <!-- ===== FEASTS ===== -->
+    <div class="view" id="view-feasts" hidden>
+      <section class="card">
+        <h2>Calendar</h2>
         <div class="manual">
-          <label>Latitude <input id="in-lat" type="number" step="0.0001" placeholder="36.1540"></label>
-          <label>Longitude <input id="in-lon" type="number" step="0.0001" placeholder="-95.9928"></label>
-          <button type="button" id="btn-save">Save</button>
+          <label>How the month starts
+            <select id="sel-method">
+              <option value="sighted">Sighted moon (first crescent)</option>
+              <option value="conjunction">Conjunction (dark moon)</option>
+              <option value="full">Full moon</option>
+            </select>
+          </label>
+          <label id="sight-wrap">Crescent sighted from
+            <select id="sel-sight">
+              <option value="jerusalem">Jerusalem</option>
+              <option value="local">My location</option>
+            </select>
+          </label>
         </div>
-      </details>
-    </section>
+      </section>
+
+      <div class="yearbar">
+        <button type="button" class="small" id="yr-prev" aria-label="Previous year">&lsaquo;</button>
+        <h2 id="yr-title">Appointed times</h2>
+        <button type="button" class="small" id="yr-next" aria-label="Next year">&rsaquo;</button>
+      </div>
+      <p class="muted center" id="yr-note"></p>
+      <div id="feast-list"></div>
+
+      <section class="card">
+        <details>
+          <summary>New moons this year</summary>
+          <ul class="plain" id="newmoon-list"></ul>
+        </details>
+      </section>
+    </div>
 
     <footer class="foot">
-      Sunset times are calculated on your phone. Version 0.1
+      Times are calculated on your phone. Version 0.2
     </footer>
   </main>
 
+  <nav class="tabs">
+    <button type="button" class="tab active" data-view="home">Home</button>
+    <button type="button" class="tab" data-view="feasts">Feasts</button>
+  </nav>
+
   <script src="js/sun.js"></script>
+  <script src="js/astro.js"></script>
+  <script src="js/feasts.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
