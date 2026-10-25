@@ -17,7 +17,8 @@
     try { localStorage.setItem(STORE_KEY, JSON.stringify(loc)); } catch (e) { /* ignore */ }
   }
 
-  let loc = loadLocation();
+  // DEMO_LOCATION is set only by the shareable preview page; the real app starts with no location.
+  let loc = loadLocation() || window.DEMO_LOCATION || null;
 
   // ---- find the current or next Sabbath (follows the chosen calendar)
   function findSabbath(now) {
@@ -456,8 +457,17 @@
   }
   $("check-add").addEventListener("click", addItem);
   $("check-input").addEventListener("keydown", (e) => { if (e.key === "Enter") addItem(); });
+  // Two-tap reset (pop-up confirms are not shown everywhere).
+  let resetArmed = null;
   $("check-reset").addEventListener("click", () => {
-    if (!confirm("Put back the starter list? Your own items will be removed.")) return;
+    const btn = $("check-reset");
+    if (!resetArmed) {
+      btn.textContent = "Tap again to put back the starter list (your own items will be removed)";
+      resetArmed = setTimeout(() => { resetArmed = null; btn.textContent = "Reset to the starter list"; }, 4000);
+      return;
+    }
+    clearTimeout(resetArmed); resetArmed = null;
+    btn.textContent = "Reset to the starter list";
     Checklists.reset(pageKey);
     renderChecklist(); updateSabbathButton();
   });

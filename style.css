@@ -6,6 +6,7 @@
   --muted: #b9b2d6;
   --gold: #e3c27a;
   --violet: #8b7cf0;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }

@@ -14,6 +14,9 @@ Keep this file. Every command you need is here.
 - `js/checklists.js` : the starter prep checklists. Edit the lists at the top of this file to change what new users see
 - `tools/build_content.py` : where the "What Scripture instructs" lines live. Scripture is pulled word for word from the World English Bible
 - `tools/web_text.py` : helper that reads the World English Bible data
+- `APK-NOTES.md` : how to build the Android APK with GitHub (signing key, secrets, download)
+- `android/` : the Android app shell, `package.json` and `capacitor.config.json` : Android build settings
+- `.github/workflows/android.yml` : the GitHub build that makes the APK
 
 ## Changing a feast page
 

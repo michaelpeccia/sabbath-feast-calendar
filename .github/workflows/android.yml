@@ -1,0 +1,72 @@
+# Builds the Android APK on every push to main, or when you tap "Run workflow" on GitHub.
+# With the signing secrets set, it builds a release APK signed with your key.
+# Without them, it builds a debug APK (fine for a quick look, but it can't update into the Play version).
+
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      HAS_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+      VERSION_CODE: ${{ github.run_number }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install and copy the app into the Android project
+        run: |
+          npm ci
+          npm run build
+          npx cap sync android
+
+      - name: Unpack the signing key
+        if: env.HAS_KEY == 'true'
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Build the APK
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          if [ "$HAS_KEY" = "true" ]; then
+            ./gradlew assembleRelease --no-daemon
+          else
+            ./gradlew assembleDebug --no-daemon
+          fi
+
+      - name: Name the APK
+        run: |
+          mkdir -p out
+          if [ "$HAS_KEY" = "true" ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk "out/sabbath-feast-days-build-${VERSION_CODE}.apk"
+          else
+            cp android/app/build/outputs/apk/debug/app-debug.apk "out/sabbath-feast-days-build-${VERSION_CODE}-debug.apk"
+          fi
+          ls -l out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sabbath-feast-apk
+          path: out/*.apk
+          retention-days: 30
