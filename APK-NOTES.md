@@ -69,15 +69,29 @@ Never put the key file in the app folder or on GitHub. (The app folder is set up
 
 ## 5. Give the key to GitHub as secrets
 
+First, save the key password to a temporary file and check it against the key. Type the password once at the prompt (nothing shows while you type):
+
+```
+read -s -p "Key password: " P; printf '%s' "$P" > ~/keys/pass.txt; unset P; echo
+keytool -list -keystore ~/keys/kingdom-life-release.jks -storepass:file ~/keys/pass.txt
+```
+
+It must show `kingdomlife ... PrivateKeyEntry`. If it says the password is incorrect, run `rm ~/keys/pass.txt` and try again.
+
+Then send the key and that exact password to GitHub, and delete the temporary file:
+
 ```
 cd ~/sabbath-feast-calendar
 base64 -w 0 ~/keys/kingdom-life-release.jks | gh secret set ANDROID_KEYSTORE_BASE64
-gh secret set ANDROID_KEYSTORE_PASSWORD
+gh secret set ANDROID_KEYSTORE_PASSWORD < ~/keys/pass.txt
 gh secret set ANDROID_KEY_ALIAS --body kingdomlife
+rm ~/keys/pass.txt
 gh secret list
 ```
 
-The second line asks you to paste the key password. `gh secret list` should show all three names.
+`gh secret list` should show all three names.
+
+(Typing or pasting the password at a "Paste your secret" prompt failed twice for us: the build said "keystore password was incorrect." The file method sends the exact password that keytool accepted.)
 
 ## 6. Push, and GitHub builds the APK
 
@@ -110,15 +124,31 @@ rm -r /storage/emulated/0/Download/sabbath-apk
 
 ## If the build fails
 
+See your recent builds (✓ = worked, X = failed):
+
 ```
-gh run view --log-failed | tail -60
+gh run list --limit 5
+```
+
+Show the error from the latest build:
+
+```
+gh run view $(gh run list --limit 1 --json databaseId -q '.[0].databaseId') --log-failed | tail -60
 ```
 
 Copy what it shows and send it to Claude.
 
+Start a build by hand (without pushing):
+
+```
+gh workflow run android.yml
+gh run watch
+```
+
 ## Good to know
 
 - Each build gets a higher version number automatically, so new APKs install right over the old one and keep saved settings and checklists.
-- No reminders or widget yet. They come in the next version.
+- **Reminders** (version 0.8 and up): set them in Settings, Reminders. The first time, Android asks to allow notifications: tap Allow. The app sets reminders for the next 12 weeks and refreshes them every time it is opened.
+- **Widget** (version 0.8 and up): long-press an empty spot on your home screen, tap Widgets, find Sabbath & Feast Days, and drag it onto the screen. Open the app once afterward so the widget gets the dates. It updates about every 30 minutes; tap it to open the app.
 - The phone's Back button closes the app. Use the Back link at the top of feast pages.
 - The app icon is a placeholder until we make a real one.

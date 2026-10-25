@@ -195,6 +195,45 @@
         </div>
       </section>
       <section class="card">
+        <h2>Reminders</h2>
+        <div class="rem">
+          <label class="rem-row" for="rem-before">
+            <input type="checkbox" id="rem-before">
+            <span>Before the Sabbath begins</span>
+          </label>
+          <select id="rem-before-lead" aria-label="How early to remind you before the Sabbath">
+            <option value="15">15 minutes before sunset</option>
+            <option value="30">30 minutes before sunset</option>
+            <option value="60">1 hour before sunset</option>
+            <option value="120">2 hours before sunset</option>
+            <option value="180">3 hours before sunset</option>
+            <option value="360">6 hours before sunset</option>
+            <option value="-1">The morning of (9 AM)</option>
+          </select>
+          <label class="rem-row" for="rem-start">
+            <input type="checkbox" id="rem-start">
+            <span>When the Sabbath begins</span>
+          </label>
+          <label class="rem-row" for="rem-end">
+            <input type="checkbox" id="rem-end">
+            <span>When the Sabbath ends</span>
+          </label>
+          <label class="rem-row" for="rem-feast">
+            <input type="checkbox" id="rem-feast">
+            <span>Before each feast</span>
+          </label>
+          <select id="rem-feast-lead" aria-label="How early to remind you before each feast">
+            <option value="60">1 hour before sunset</option>
+            <option value="180">3 hours before sunset</option>
+            <option value="360">6 hours before sunset</option>
+            <option value="1440">1 day before</option>
+            <option value="2880">2 days before</option>
+            <option value="10080">1 week before</option>
+          </select>
+        </div>
+        <p class="muted small-text" id="rem-note"></p>
+      </section>
+      <section class="card">
         <h2>More from Kingdom Life Ministry</h2>
         <a class="link-card" href="https://app.kingdom-life-ministry.com" target="_blank" rel="noopener">
           <span class="link-title">Kingdom Life Study app</span>
@@ -209,7 +248,7 @@
 
     <footer class="foot">
       <a class="foot-link" href="https://app.kingdom-life-ministry.com" target="_blank" rel="noopener">Study deeper with the Kingdom Life Study app</a><br>
-      Times are calculated on your phone. Version 0.7
+      Times are calculated on your phone. Version 0.8
     </footer>
   </main>
 
@@ -224,6 +263,7 @@
   <script src="js/feasts.js"></script>
   <script src="js/content.js"></script>
   <script src="js/checklists.js"></script>
+  <script src="js/reminders.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

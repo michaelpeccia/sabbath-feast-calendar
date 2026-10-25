@@ -157,6 +157,13 @@ button.pill {
 .tag.ok { border-color: var(--gold); color: var(--gold); }
 .small-text { font-size: 0.8rem; margin-top: 8px; }
 
+/* Reminders */
+.rem { display: grid; gap: 10px; }
+.rem-row { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; }
+.rem-row input { width: 20px; height: 20px; accent-color: var(--gold); flex: none; }
+.rem select { margin: -2px 0 4px 30px; width: calc(100% - 30px); }
+.rem select:disabled { opacity: 0.5; }
+
 /* Links to other Kingdom Life apps */
 .link-card {
   display: block;

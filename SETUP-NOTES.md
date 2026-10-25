@@ -11,6 +11,7 @@ Keep this file. Every command you need is here.
 - `js/feasts.js` : feast and Sabbath dates for all 8 calendars (sighted moon, conjunction, full moon, lunar Sabbath, Enoch, Qumran, Zadok, rabbinic)
 - `js/app.js` : Home, Feasts, feast pages and Settings screens, location, saved settings
 - `js/content.js` : the Sabbath and feast pages (built by the tool below, do not hand-edit)
+- `js/reminders.js` : reminder settings, scheduling and the data sent to the widget
 - `js/checklists.js` : the starter prep checklists. Edit the lists at the top of this file to change what new users see
 - `tools/build_content.py` : where the "What Scripture instructs" lines live. Scripture is pulled word for word from the World English Bible
 - `tools/web_text.py` : helper that reads the World English Bible data
@@ -182,4 +183,6 @@ Done in version 0.5: prep checklists on the Sabbath page and each feast page. Us
 
 Done in version 0.6: lunar Sabbath, Enoch, Qumran, Zadok priestly and rabbinic calendars. The Sabbath countdown follows the chosen calendar.
 
-1. Reminders and the widget (Android build, done by GitHub Actions or on the PC)
+Done in version 0.8: reminders you choose in Settings (before the Sabbath, at sunset, when it ends, before each feast) and a home-screen widget. These work in the Android app only.
+
+1. App icon and Play Store listing
