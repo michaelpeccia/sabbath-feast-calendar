@@ -1,5 +1,11 @@
 {
   "appId": "com.kingdomlifeministry.sabbathfeast",
   "appName": "Sabbath & Feast Days",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#8B7CF0"
+    }
+  }
 }

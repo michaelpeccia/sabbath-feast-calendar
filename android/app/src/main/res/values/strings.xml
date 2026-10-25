@@ -6,5 +6,5 @@
     <string name="custom_url_scheme">com.kingdomlifeministry.sabbathfeast</string>
     <string name="widget_description">Standard: Sabbath countdown and the next appointed time</string>
     <string name="widget_small_description">Small: Sabbath countdown</string>
-    <string name="widget_large_description">Large: countdown, this week's Sabbath times and the next feast</string>
+    <string name="widget_large_description">Large: countdown, this week\'s Sabbath times and the next feast</string>
 </resources>

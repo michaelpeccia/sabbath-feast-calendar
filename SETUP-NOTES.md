@@ -15,6 +15,9 @@ Keep this file. Every command you need is here.
 - `js/checklists.js` : the starter prep checklists. Edit the lists at the top of this file to change what new users see
 - `tools/build_content.py` : where the "What Scripture instructs" lines live. Scripture is pulled word for word from the World English Bible
 - `tools/web_text.py` : helper that reads the World English Bible data
+- `tools/make_icons.py` : builds every app icon size and the launch screens from the logo. Run `python tools/make_icons.py` after changing the logo
+- `assets/logo/` : the Kingdom Life Ministry logo the icon is made from
+- `store/` : the 512 x 512 Google Play icon and a 1024 x 1024 copy
 - `PRIVACY-NOTES.md` : how to publish the privacy policy page, plus Data safety form answers
 - `privacy-site/` : the privacy policy page
 - `APK-NOTES.md` : how to build the Android APK with GitHub (signing key, secrets, download)
@@ -189,4 +192,6 @@ Done in version 0.8: reminders you choose in Settings (before the Sabbath, at su
 
 Done in version 0.9: five color themes (Midnight, Parchment, Royal Blue, Olive & Gold, Black & Gold), widget colors that match the app or are picked separately, and three widget sizes (small, standard, large).
 
-1. App icon and Play Store listing
+Done in version 0.9.1: the app icon (Kingdom Life emblem on a calendar page), launch screen, and notification icon.
+
+1. Play Store listing (description, screenshots)

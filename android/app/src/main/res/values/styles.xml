@@ -18,5 +18,7 @@
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+        <!-- Android 12 and newer: the app icon on the Midnight color while the app opens -->
+        <item name="windowSplashScreenBackground">#120F2B</item>
     </style>
 </resources>
