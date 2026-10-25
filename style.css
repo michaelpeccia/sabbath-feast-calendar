@@ -154,3 +154,22 @@ button.pill {
 .watch p { margin: 0; }
 .tag.ok { border-color: var(--gold); color: var(--gold); }
 .small-text { font-size: 0.8rem; margin-top: 8px; }
+
+/* Feast pages */
+.feast[data-page], #next-feast[data-page] { cursor: pointer; }
+.more { color: var(--violet); font-size: 0.8rem; margin: 6px 0 0; }
+button.back {
+  width: auto;
+  background: none;
+  color: var(--gold);
+  padding: 4px 0;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+.page-title { color: var(--gold); font-size: 1.35rem; margin: 0 0 4px; }
+.instructs { margin: 0; padding-left: 18px; }
+.instructs li { margin-bottom: 10px; }
+.instructs .ref { display: block; color: var(--muted); font-size: 0.8rem; }
+.passage h3 { margin: 0 0 8px; font-size: 0.95rem; color: var(--gold); }
+.passage p { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 1.02rem; line-height: 1.6; }
+.passage sup { color: var(--violet); font-family: system-ui, sans-serif; font-size: 0.65rem; margin-right: 2px; }

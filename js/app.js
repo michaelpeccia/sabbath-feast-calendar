@@ -1,4 +1,4 @@
-// Sabbath & Feast Days Calendar, version 0.3
+// Sabbath & Feast Days Calendar, version 0.4
 // Home screen: Sabbath countdown and next appointed time. Feasts tab: the year's dates.
 // The weekly Sabbath runs from sunset Friday to sunset Saturday.
 
@@ -125,7 +125,7 @@
 
   // ---- calendar settings
   const SETTINGS_KEY = "sfc-settings";
-  let settings = { method: "sighted", sight: "jerusalem", yearStart: "equinox", sightings: {}, aviv: {} };
+  let settings = { method: "sighted", sight: "jerusalem", yearStart: "equinox", sightings: {}, aviv: {}, fatherName: "YHWH", sonName: "Yahshua" };
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) settings = Object.assign(settings, JSON.parse(raw));
@@ -147,6 +147,19 @@
     return isExpected ? '<span class="tag">expected</span>' : "";
   }
 
+  // Swap in the user's chosen names (the World English Bible uses "Yahweh").
+  function withNames(text) {
+    const father = settings.fatherName || "YHWH";
+    if (father === "LORD") {
+      // Traditional style: "the LORD", capitalized at the start of a sentence.
+      text = text
+        .replace(/(^|[.!?]\s+|[“‘"]\s*)Yahweh/g, "$1The LORD")
+        .replace(/Yahweh/g, "the LORD");
+    }
+    return text.replace(/Yahweh/g, father)
+               .replace(/\{Son\}/g, settings.sonName || "Yahshua");
+  }
+
   // ---- home: next appointed time
   function renderNextFeast() {
     if (!loc) return;
@@ -163,10 +176,12 @@
       line = "Begins at sunset " + shortDay(f.start) + ", " + shortTime(f.start) +
              " (" + (days === 1 ? "1 day" : days + " days") + ")";
     }
+    box.dataset.page = f.key;
     box.innerHTML =
       '<p class="big-name">' + f.name + expectedTag(f.expected) + "</p>" +
       '<p class="when">' + line + "</p>" +
-      '<p class="daylabel muted">' + f.dayLabel + " &middot; " + f.ref + "</p>";
+      '<p class="daylabel muted">' + f.dayLabel + " &middot; " + f.ref + "</p>" +
+      '<p class="more">Tap to read what Scripture says</p>';
   }
 
   // ---- home: new moon watch (sighted moon only)
@@ -246,11 +261,12 @@
 
     $("feast-list").innerHTML = yr.feasts.map((f) => {
       const cls = f.end <= now ? "past" : (f.start <= now ? "now" : "");
-      return '<section class="card feast ' + cls + '">' +
+      return '<section class="card feast ' + cls + '" data-page="' + f.key + '">' +
         '<div class="feast-head"><h3>' + f.name + expectedTag(f.expected) + "</h3>" +
         '<span class="ref">' + f.ref + "</span></div>" +
         '<p class="span">' + spanText(f) + "</p>" +
-        '<p class="daylabel">' + f.dayLabel + "</p></section>";
+        '<p class="daylabel">' + f.dayLabel + "</p>" +
+        '<p class="more">Read the Scripture</p></section>';
     }).join("");
 
     // Months, with sighting buttons for the sighted moon
@@ -283,6 +299,8 @@
     $("sel-sight").value = settings.sight;
     $("sel-yearstart").value = settings.yearStart || "equinox";
     $("sight-wrap").hidden = settings.method !== "sighted";
+    $("sel-father").value = settings.fatherName || "YHWH";
+    $("sel-son").value = settings.sonName || "Yahshua";
   }
 
   $("sel-method").addEventListener("change", (e) => {
@@ -312,13 +330,69 @@
   $("watch-seen").addEventListener("click", (e) => changeSighting(e.target.dataset.key, "seen"));
   $("watch-not").addEventListener("click", (e) => changeSighting(e.target.dataset.key, "later"));
 
+
+  // ---- feast and Sabbath pages
+  let currentView = "home";
+  let returnView = "home";
+
+  function showView(name) {
+    document.querySelectorAll(".view").forEach((v) => { v.hidden = v.id !== "view-" + name; });
+    document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
+    if (name !== "page") currentView = name;
+    window.scrollTo(0, 0);
+  }
+
+  function openPage(key) {
+    const c = window.CONTENT && window.CONTENT[key];
+    if (!c) return;
+    returnView = currentView;
+    $("page-title").textContent = c.name;
+
+    // This year's dates for the feast, when we have a location
+    let dates = "";
+    if (key === "sabbath") {
+      dates = "Every seventh day, from sunset to sunset.";
+    } else if (loc) {
+      const now = new Date();
+      const gy = viewYear !== null ? viewYear : (Feasts.nextFeast(now, loc, settings) || { gYear: now.getFullYear() }).gYear;
+      const yr = Feasts.buildYear(gy, loc, settings);
+      const f = yr && yr.feasts.find((x) => x.key === key);
+      if (f) dates = spanText(f) + (f.expected ? " (expected)" : "") + " · " + f.dayLabel;
+    }
+    $("page-dates").textContent = dates;
+
+    $("page-instructs").innerHTML = c.instructs.map((i) =>
+      "<li>" + withNames(i.text) + '<span class="ref">' + i.ref + "</span></li>"
+    ).join("");
+
+    $("page-passages").innerHTML = c.passages.map((p) =>
+      '<section class="card passage"><h3>' + p.ref + "</h3><p>" +
+      p.verses.map((v) => "<sup>" + v.v + "</sup>" + withNames(v.t)).join(" ") +
+      "</p></section>"
+    ).join("");
+
+    showView("page");
+  }
+
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("button[data-act], button[data-aviv]")) return;
+    const el = e.target.closest("[data-page]");
+    if (el && el.dataset.page) openPage(el.dataset.page);
+  });
+  $("page-back").addEventListener("click", () => {
+    showView(returnView);
+    if (returnView === "feasts") renderFeastList();
+  });
+
+  // ---- names
+  $("sel-father").addEventListener("change", (e) => { settings.fatherName = e.target.value; saveSettings(); });
+  $("sel-son").addEventListener("change", (e) => { settings.sonName = e.target.value; saveSettings(); });
+
   // ---- tabs
   document.querySelectorAll(".tab").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b === btn));
-      document.querySelectorAll(".view").forEach((v) => { v.hidden = v.id !== "view-" + btn.dataset.view; });
+      showView(btn.dataset.view);
       if (btn.dataset.view === "feasts") renderFeastList();
-      window.scrollTo(0, 0);
     });
   });
 

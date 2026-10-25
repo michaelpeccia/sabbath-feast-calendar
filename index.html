@@ -37,6 +37,7 @@
           <dt>Sabbath begins</dt><dd id="t-start">-</dd>
           <dt>Sabbath ends</dt><dd id="t-end">-</dd>
         </dl>
+        <div class="pills"><button type="button" class="pill" data-page="sabbath">What Scripture says about the Sabbath</button></div>
       </section>
 
       <section class="card" id="feast-card">
@@ -110,19 +111,68 @@
       </section>
     </div>
 
+    <!-- ===== FEAST PAGE ===== -->
+    <div class="view" id="view-page" hidden>
+      <button type="button" class="back" id="page-back">&lsaquo; Back</button>
+      <h2 class="page-title" id="page-title"></h2>
+      <p class="muted" id="page-dates"></p>
+
+      <section class="card">
+        <h2>What Scripture instructs</h2>
+        <ul class="instructs" id="page-instructs"></ul>
+      </section>
+
+      <div id="page-passages"></div>
+      <p class="muted small-text center">Scripture: World English Bible (public domain), with your chosen names.</p>
+    </div>
+
+    <!-- ===== SETTINGS ===== -->
+    <div class="view" id="view-settings" hidden>
+      <section class="card">
+        <h2>Names</h2>
+        <p class="muted small-text">Used everywhere in the app, including in Scripture.</p>
+        <div class="manual">
+          <label>Name of the Father
+            <select id="sel-father">
+              <option>YHWH</option>
+              <option>Yahuah</option>
+              <option>YHVH</option>
+              <option>Yahweh</option>
+              <option>Jehovah</option>
+              <option value="LORD">LORD / God</option>
+            </select>
+          </label>
+          <label>Name of the Son
+            <select id="sel-son">
+              <option>Yahshua</option>
+              <option>Yahushua</option>
+              <option>Yeshua</option>
+              <option>Jesus</option>
+            </select>
+          </label>
+        </div>
+      </section>
+      <section class="card">
+        <h2>About</h2>
+        <p class="muted">Sabbath &amp; Feast Days Calendar by Kingdom Life Ministry. No ads, no tracking, no account. Everything is calculated on your phone.</p>
+      </section>
+    </div>
+
     <footer class="foot">
-      Times are calculated on your phone. Version 0.3
+      Times are calculated on your phone. Version 0.4
     </footer>
   </main>
 
   <nav class="tabs">
     <button type="button" class="tab active" data-view="home">Home</button>
     <button type="button" class="tab" data-view="feasts">Feasts</button>
+    <button type="button" class="tab" data-view="settings">Settings</button>
   </nav>
 
   <script src="js/sun.js"></script>
   <script src="js/astro.js"></script>
   <script src="js/feasts.js"></script>
+  <script src="js/content.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
