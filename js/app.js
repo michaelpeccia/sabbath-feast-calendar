@@ -1,4 +1,4 @@
-// Sabbath & Feast Days Calendar, version 0.9
+// Sabbath & Feast Days Calendar, version 0.10
 // Home screen: Sabbath countdown and next appointed time. Feasts tab: the year's dates.
 // The weekly Sabbath runs from sunset Friday to sunset Saturday.
 

@@ -242,3 +242,26 @@ button.swatch {
 }
 button.swatch[aria-pressed="true"] { border-color: var(--gold); }
 .swatch-dot { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(128,128,128,0.4); }
+
+/* Free trial and unlock */
+.trial-banner { display: flex; align-items: center; gap: 12px; border-color: var(--gold); }
+.trial-banner p { margin: 0; flex: 1; }
+.trial-banner .pill { flex: none; }
+#trial-card { border-color: var(--gold); }
+#trial-card p { margin: 0 0 10px; }
+body.locked { overflow: hidden; }
+.lock {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px;
+  overflow-y: auto;
+}
+.lock-box {
+  max-width: 420px; width: 100%;
+  background: var(--card); border: 1px solid var(--gold); border-radius: 16px;
+  padding: 24px 20px; text-align: center;
+}
+.lock-box h2 { color: var(--gold); font-size: 1.25rem; margin: 0 0 12px; }
+.lock-box p { margin: 0 0 12px; }
+.lock-box #lock-buy { margin: 6px 0 10px; }
