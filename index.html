@@ -16,9 +16,9 @@
 
     <!-- ===== HOME ===== -->
     <div class="view" id="view-home">
-      <section class="card trial-banner" id="trial-banner" hidden>
-        <p id="trial-banner-text"></p>
-        <button type="button" class="pill" id="trial-banner-buy">Unlock for <span class="unlock-price">$4.99</span></button>
+      <section class="card trial" id="trial-card" hidden>
+        <p id="trial-text">Free trial</p>
+        <button type="button" class="pill js-buy">Unlock for <span class="js-price">$4.99</span></button>
       </section>
 
       <section class="card countdown" id="countdown-card">
@@ -175,14 +175,6 @@
 
     <!-- ===== SETTINGS ===== -->
     <div class="view" id="view-settings" hidden>
-      <section class="card" id="trial-card" hidden>
-        <h2 id="trial-title">Your free trial</h2>
-        <p id="trial-text"></p>
-        <button type="button" id="trial-buy">Unlock the full app for <span class="unlock-price">$4.99</span></button>
-        <button type="button" class="linkish" id="trial-restore">Already bought it? Restore purchase</button>
-        <p class="muted small-text" id="trial-msg"></p>
-        <p class="muted small-text">One-time purchase. No subscription, no ads.</p>
-      </section>
       <section class="card">
         <h2>Names</h2>
         <p class="muted small-text">Used everywhere in the app, including in Scripture.</p>
@@ -264,6 +256,15 @@
         </div>
         <p class="muted small-text" id="rem-note"></p>
       </section>
+      <section class="card" id="full-card" hidden>
+        <h2>Full version</h2>
+        <p class="muted" id="full-status"></p>
+        <div class="pills">
+          <button type="button" class="pill js-buy" id="full-buy">Unlock for <span class="js-price">$4.99</span></button>
+          <button type="button" class="pill js-restore">Restore purchase</button>
+        </div>
+        <p class="muted small-text" id="full-status-note"></p>
+      </section>
       <section class="card">
         <h2>More from Kingdom Life Ministry</h2>
         <a class="link-card" href="https://app.kingdom-life-ministry.com" target="_blank" rel="noopener">
@@ -280,9 +281,26 @@
 
     <footer class="foot">
       <a class="foot-link" href="https://app.kingdom-life-ministry.com" target="_blank" rel="noopener">Study deeper with the Kingdom Life Study app</a><br>
-      Times are calculated on your phone. Version 0.10
+      Times are calculated on your phone. Version 0.10.0
     </footer>
   </main>
+
+  <div class="lock" id="lock" hidden role="dialog" aria-modal="true" aria-labelledby="lock-title">
+    <div class="lock-box">
+      <p class="lock-kicker">Sabbath &amp; Feast Days</p>
+      <h2 id="lock-title">Your 14-day free trial has ended</h2>
+      <p>Unlock the full app with one payment of <span class="js-price">$4.99</span>. No subscription, no ads, and every future update included.</p>
+      <ul class="lock-list">
+        <li>Sabbath countdown for your location</li>
+        <li>All 8 calendars and every feast date</li>
+        <li>Scripture and prep lists for every appointed time</li>
+        <li>Reminders and the home-screen widget</li>
+      </ul>
+      <button type="button" class="js-buy">Unlock for <span class="js-price">$4.99</span></button>
+      <button type="button" class="linkish js-restore">Already bought it? Restore purchase</button>
+      <p class="muted small-text" id="lock-status"></p>
+    </div>
+  </div>
 
   <nav class="tabs">
     <button type="button" class="tab active" data-view="home">Home</button>
@@ -290,26 +308,13 @@
     <button type="button" class="tab" data-view="settings">Settings</button>
   </nav>
 
-  <!-- ===== AFTER THE FREE TRIAL ===== -->
-  <div class="lock" id="lock" hidden role="dialog" aria-modal="true" aria-labelledby="lock-title">
-    <div class="lock-box">
-      <h2 id="lock-title">Your free trial has ended</h2>
-      <p>Thank you for keeping the Sabbath and the appointed times with us these 14 days.</p>
-      <p>Unlock the app once to keep every calendar, reminder, widget and Scripture page.</p>
-      <button type="button" id="lock-buy">Unlock for <span class="unlock-price">$4.99</span></button>
-      <p class="muted small-text">One-time purchase through Google Play. No subscription, no ads.</p>
-      <button type="button" class="linkish" id="lock-restore">Already bought it? Restore purchase</button>
-      <p class="muted small-text" id="lock-msg"></p>
-    </div>
-  </div>
-
   <script src="js/sun.js"></script>
   <script src="js/astro.js"></script>
   <script src="js/feasts.js"></script>
   <script src="js/content.js"></script>
   <script src="js/checklists.js"></script>
   <script src="js/reminders.js"></script>
-  <script src="js/app.js"></script>
   <script src="js/trial.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

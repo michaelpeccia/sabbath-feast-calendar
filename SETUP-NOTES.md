@@ -20,6 +20,8 @@ Keep this file. Every command you need is here.
 - `store/` : the 512 x 512 Google Play icon and a 1024 x 1024 copy
 - `PRIVACY-NOTES.md` : how to publish the privacy policy page, plus Data safety form answers
 - `privacy-site/` : the privacy policy page
+- `js/trial.js` : the 14-day free trial and the $4.99 unlock
+- `TRIAL-NOTES.md` : Play Console steps for the free trial and unlock product
 - `APK-NOTES.md` : how to build the Android APK with GitHub (signing key, secrets, download)
 - `android/` : the Android app shell, `package.json` and `capacitor.config.json` : Android build settings
 - `.github/workflows/android.yml` : the GitHub build that makes the APK
@@ -191,6 +193,8 @@ Done in version 0.6: lunar Sabbath, Enoch, Qumran, Zadok priestly and rabbinic c
 Done in version 0.8: reminders you choose in Settings (before the Sabbath, at sunset, when it ends, before each feast) and a home-screen widget. These work in the Android app only.
 
 Done in version 0.9: five color themes (Midnight, Parchment, Royal Blue, Olive & Gold, Black & Gold), widget colors that match the app or are picked separately, and three widget sizes (small, standard, large).
+
+Done in version 0.10.0: free download with a 14-day free trial, then a one-time $4.99 unlock through Google Play. Play Console steps are in TRIAL-NOTES.md.
 
 Done in version 0.9.1: the app icon (Kingdom Life emblem on a calendar page), launch screen, and notification icon.
 

@@ -1,4 +1,4 @@
-// Sabbath & Feast Days Calendar, version 0.10
+// Sabbath & Feast Days Calendar, version 0.9
 // Home screen: Sabbath countdown and next appointed time. Feasts tab: the year's dates.
 // The weekly Sabbath runs from sunset Friday to sunset Saturday.
 
@@ -540,6 +540,8 @@
   });
 
   syncSettingsUI();
+  // Free trial first, so reminders know whether the app is locked.
+  if (window.Trial) Trial.init({ onChange: () => { if (window.Reminders) Reminders.refresh(); } });
   if (window.Reminders) {
     Reminders.init({ getLoc: () => loc, getSettings: () => settings, saveSettings });
     // Coming back to the app refreshes reminders and the widget.

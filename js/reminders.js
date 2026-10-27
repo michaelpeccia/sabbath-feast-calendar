@@ -128,6 +128,7 @@
         await LN.cancel({ notifications: pending.notifications.map((n) => ({ id: n.id })) });
       }
       const p = prefs();
+      if (window.Trial && Trial.locked()) { setNote("Reminders are paused until the app is unlocked."); return; }
       if (!ctx.getLoc() || !(p.before || p.atStart || p.atEnd || p.feast)) { setNote(""); return; }
 
       let perm = await LN.checkPermissions();
@@ -148,6 +149,11 @@
   async function updateWidget() {
     const W = plugin("WidgetBridge");
     if (!W || !ctx.getLoc()) return;
+    if (window.Trial && Trial.locked()) {
+      // An empty list makes the widget show "Open the app" instead of stale times.
+      try { await W.setData({ json: JSON.stringify({ updated: Date.now(), sabbaths: [], feasts: [] }) }); } catch (e) { /* ignore */ }
+      return;
+    }
     const st = ctx.getSettings();
     const theme = !st.widgetTheme || st.widgetTheme === "match" ? (st.palette || "midnight") : st.widgetTheme;
     const data = {

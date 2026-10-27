@@ -1,28 +1,39 @@
-// 14-day free trial, then a one-time unlock through Google Play.
-// The trial counts from the day the app was first installed. Once the unlock is
-// bought it is remembered on the phone, so the app keeps working offline.
-// In a web browser (the preview page) there is no trial and nothing is locked.
+// 14-day free trial and the one-time unlock (Google Play in-app product).
+// Only runs inside the Android app. The web preview is never locked.
+//
+// How it works:
+// - The first time the app opens, the trial start date is saved on the phone.
+// - For 14 days everything works. Home shows how many trial days are left.
+// - After 14 days a screen asks for the one-time unlock. Reminders and the
+//   widget pause until the app is unlocked.
+// - Buying the unlock (product ID below) unlocks the app for good. "Restore
+//   purchase" finds an earlier purchase on the same Google account, for example
+//   after reinstalling or on a new phone.
 
 (function () {
+  const PRODUCT_ID = "full_unlock";     // must match the product ID in Play Console
   const TRIAL_DAYS = 14;
-  const DAY = 86400000;
-  const KEY = "sfc-license";
   const FALLBACK_PRICE = "$4.99";
-  const $ = (id) => document.getElementById(id);
+  const KEY = "sfc-trial";
+  const DAY = 86400000;
 
   let state = { start: 0, unlocked: false };
   let price = FALLBACK_PRICE;
   let busy = false;
+  let onChange = function () {};
 
+  const $ = (id) => document.getElementById(id);
+
+  function cap() { return window.Capacitor; }
   function isNative() {
-    const c = window.Capacitor;
+    const c = cap();
     return !!(c && c.isNativePlatform && c.isNativePlatform());
   }
-  function billing() {
-    const c = window.Capacitor;
+  function store() {
+    const c = cap();
     if (!c) return null;
-    if (c.Plugins && c.Plugins.PlayBilling) return c.Plugins.PlayBilling;
-    return c.registerPlugin ? c.registerPlugin("PlayBilling") : null;
+    if (c.Plugins && c.Plugins.NativePurchases) return c.Plugins.NativePurchases;
+    return c.registerPlugin ? c.registerPlugin("NativePurchases") : null;
   }
 
   function load() {
@@ -30,125 +41,152 @@
       const raw = localStorage.getItem(KEY);
       if (raw) state = Object.assign(state, JSON.parse(raw));
     } catch (e) { /* ignore */ }
+    if (!state.start) { state.start = Date.now(); save(); }
   }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
   }
 
   function daysLeft() {
-    return Math.max(0, Math.ceil((state.start + TRIAL_DAYS * DAY - Date.now()) / DAY));
+    const used = Math.floor((Date.now() - state.start) / DAY);
+    return Math.max(0, TRIAL_DAYS - used);
   }
-  function expired() { return !state.unlocked && Date.now() >= state.start + TRIAL_DAYS * DAY; }
+  function unlocked() { return !isNative() || state.unlocked; }
+  function locked() { return isNative() && !state.unlocked && daysLeft() <= 0; }
+
+  function setUnlocked(v) {
+    if (state.unlocked === v) return;
+    state.unlocked = v;
+    save();
+    render();
+    onChange();
+  }
+
+  function setStatus(text) {
+    ["lock-status", "full-status-note"].forEach((id) => { const el = $(id); if (el) el.textContent = text || ""; });
+  }
+
+  // ---------- talk to Google Play ----------
+  function ownsUnlock(purchases) {
+    return (purchases || []).find((p) => p.productIdentifier === PRODUCT_ID);
+  }
+
+  async function checkPurchases(showResult) {
+    const S = store();
+    if (!S) { if (showResult) setStatus("Google Play is not available on this phone."); return; }
+    try {
+      const res = await S.getPurchases({ productType: "inapp" });
+      const p = ownsUnlock(res && res.purchases);
+      if (p && String(p.purchaseState) === "1") {
+        if (p.isAcknowledged === false && p.purchaseToken) {
+          try { await S.acknowledgePurchase({ purchaseToken: p.purchaseToken }); } catch (e) { /* retried next launch */ }
+        }
+        setUnlocked(true);
+        if (showResult) setStatus("Purchase restored. Thank you!");
+      } else if (p && String(p.purchaseState) === "0") {
+        if (showResult) setStatus("Your payment is still pending with Google Play. The app unlocks as soon as it goes through.");
+      } else if (showResult) {
+        setStatus("No purchase found on this Google account.");
+      }
+    } catch (e) {
+      if (showResult) setStatus("Could not reach Google Play. Check your connection and try again.");
+    }
+  }
+
+  async function loadPrice() {
+    const S = store();
+    if (!S) return;
+    try {
+      const res = await S.getProducts({ productIdentifiers: [PRODUCT_ID], productType: "inapp" });
+      const prod = res && res.products && res.products[0];
+      if (prod && prod.priceString) { price = prod.priceString; render(); }
+    } catch (e) { /* keep the fallback price */ }
+  }
+
+  async function buy() {
+    if (busy) return;
+    const S = store();
+    if (!S) { setStatus("Google Play is not available on this phone."); return; }
+    busy = true; render();
+    setStatus("Opening Google Play...");
+    try {
+      const t = await S.purchaseProduct({ productIdentifier: PRODUCT_ID, productType: "inapp" });
+      if (t && String(t.purchaseState) === "0") {
+        setStatus("Your payment is pending with Google Play. The app unlocks as soon as it goes through.");
+      } else {
+        setUnlocked(true);
+        setStatus("Thank you! The full version is unlocked.");
+      }
+    } catch (e) {
+      const msg = String((e && e.message) || e || "");
+      if (/cancel/i.test(msg)) setStatus("");
+      else if (/already/i.test(msg)) { await checkPurchases(true); }
+      else setStatus("The purchase did not go through. " + msg);
+    }
+    busy = false; render();
+  }
 
   // ---------- screen ----------
   function render() {
-    if (!isNative()) return;
+    const native = isNative();
     const left = daysLeft();
+    const isLocked = locked();
+
+    const lock = $("lock");
+    if (lock) lock.hidden = !isLocked;
+    document.body.classList.toggle("is-locked", isLocked);
+
     const card = $("trial-card");
-    card.hidden = false;
-    $("lock").hidden = !expired();
-    document.body.classList.toggle("locked", expired());
-    $("trial-banner").hidden = state.unlocked || expired() || left > 3;
-
-    document.querySelectorAll(".unlock-price").forEach((el) => { el.textContent = price; });
-
-    if (state.unlocked) {
-      $("trial-title").textContent = "Unlocked";
-      $("trial-text").textContent = "Thank you for supporting Kingdom Life Ministry. The full app is yours on this Google account.";
-      $("trial-buy").hidden = true;
-      $("trial-restore").hidden = true;
-    } else {
-      $("trial-title").textContent = "Your free trial";
+    if (card) {
+      card.hidden = !native || state.unlocked || isLocked;
       $("trial-text").textContent = left === 1
-        ? "1 day left in your free trial."
-        : left + " days left in your free trial.";
-      $("trial-buy").hidden = false;
-      $("trial-restore").hidden = false;
+        ? "Free trial: 1 day left"
+        : "Free trial: " + left + " days left";
     }
-    $("trial-banner-text").textContent = left === 1
-      ? "Your free trial ends tomorrow."
-      : "Your free trial ends in " + left + " days.";
-  }
 
-  function say(text) {
-    $("lock-msg").textContent = text;
-    $("trial-msg").textContent = text;
-  }
-
-  // ---------- Google Play ----------
-  function applyStatus(res) {
-    if (res && res.owned) {
-      state.unlocked = true;
-      save();
-      say("");
-    } else if (res && res.pending) {
-      say("Your payment is pending. The app unlocks as soon as Google confirms it.");
+    const full = $("full-card");
+    if (full) {
+      full.hidden = !native;
+      $("full-status").textContent = state.unlocked
+        ? "Full version unlocked. Thank you for supporting Kingdom Life Ministry."
+        : isLocked
+          ? "Your free trial has ended."
+          : "Free trial: " + left + (left === 1 ? " day" : " days") + " left. Unlock once for " + price + ". No subscription, no ads.";
+      $("full-buy").hidden = state.unlocked;
     }
-    render();
+
+    document.querySelectorAll(".js-price").forEach((el) => { el.textContent = price; });
+    document.querySelectorAll(".js-buy").forEach((el) => { el.disabled = busy; });
   }
 
-  function checkStatus(fromButton) {
-    const B = billing();
-    if (!B) return Promise.resolve();
-    return B.getStatus().then((res) => {
-      applyStatus(res);
-      if (fromButton && !(res && (res.owned || res.pending))) {
-        say("No purchase found on this Google account. If you bought it on another account, switch to that account in the Play Store and try again.");
-      }
-    }).catch(() => {
-      if (fromButton) say("Couldn't reach Google Play. Make sure you're online and signed in to the Play Store, then try again.");
-    });
-  }
-
-  function buy() {
-    const B = billing();
-    if (!B || busy) return;
-    busy = true;
-    say("Opening Google Play...");
-    B.buy().then((res) => {
-      if (res && res.canceled) say("");
-      else if (res && res.failed) say("The purchase didn't go through. Please try again.");
-      applyStatus(res);
-    }).catch((e) => {
-      say(e && e.code === "noproduct"
-        ? "The unlock isn't available yet. Please try again later."
-        : "Couldn't reach Google Play. Make sure you're online and signed in to the Play Store, then try again.");
-    }).then(() => { busy = false; });
-  }
-
-  // ---------- start ----------
-  function init() {
-    if (!isNative()) return;
-    load();
-    if (!state.start) state.start = Date.now();
-    save();
-    render();
-
-    const B = billing();
-    if (B) {
-      // Count from the first install, so clearing the app's data doesn't restart the trial.
-      B.getInstallTime().then((r) => {
-        if (r && r.firstInstall > 0 && r.firstInstall < state.start) { state.start = r.firstInstall; save(); render(); }
-      }).catch(() => {});
-      B.getPrice().then((r) => { if (r && r.price) { price = r.price; render(); } }).catch(() => {});
-    }
-    checkStatus(false);
-
-    ["lock-buy", "trial-buy", "trial-banner-buy"].forEach((id) => $(id).addEventListener("click", buy));
-    ["lock-restore", "trial-restore"].forEach((id) => $(id).addEventListener("click", () => {
-      say("Checking Google Play...");
-      checkStatus(true);
+  function bind() {
+    document.querySelectorAll(".js-buy").forEach((el) => el.addEventListener("click", buy));
+    document.querySelectorAll(".js-restore").forEach((el) => el.addEventListener("click", () => {
+      setStatus("Checking Google Play...");
+      checkPurchases(true);
     }));
-
-    // Coming back to the app (after a pending payment clears, or the next day) updates everything.
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) return;
-      render();
-      if (!state.unlocked) checkStatus(false);
+      if (!document.hidden) { render(); onChange(); }
     });
-    setInterval(render, 60000);
   }
 
-  window.Trial = { isLocked: () => isNative() && expired() };
-  init();
+  function init(options) {
+    if (options && options.onChange) onChange = options.onChange;
+    if (!isNative()) { render(); return; }
+    load();
+    bind();
+    render();
+    checkPurchases(false);
+    loadPrice();
+    const S = store();
+    if (S && S.addListener) {
+      try {
+        S.addListener("transactionUpdated", (t) => {
+          if (t && t.productIdentifier === PRODUCT_ID && String(t.purchaseState) === "1") setUnlocked(true);
+        });
+      } catch (e) { /* older plugin */ }
+    }
+  }
+
+  window.Trial = { init, locked, unlocked, daysLeft, PRODUCT_ID };
 })();

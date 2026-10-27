@@ -232,6 +232,27 @@ button.back {
 .passage p { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 1.02rem; line-height: 1.6; }
 .passage sup { color: var(--violet); font-family: system-ui, sans-serif; font-size: 0.65rem; margin-right: 2px; }
 
+/* Free trial and unlock */
+.trial { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-color: var(--violet); }
+.trial p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.trial button.pill { flex: none; }
+.lock {
+  position: fixed; inset: 0; z-index: 50;
+  background: var(--bg);
+  display: grid; place-items: center;
+  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+.lock-box { max-width: 420px; width: 100%; text-align: center; }
+.lock-kicker { color: var(--gold); font-weight: 600; margin: 0 0 6px; }
+.lock-box h2 { margin: 0 0 10px; font-size: 1.35rem; }
+.lock-box > p { color: var(--muted); }
+.lock-list { text-align: left; margin: 14px 0 20px; padding-left: 20px; color: var(--text); }
+.lock-list li { margin-bottom: 6px; }
+.lock-box button.linkish { display: block; margin: 6px auto 0; }
+body.is-locked .tabs { display: none; }
+button:disabled { opacity: 0.6; }
+
 /* Appearance */
 .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 8px; }
 button.swatch {
@@ -242,26 +263,3 @@ button.swatch {
 }
 button.swatch[aria-pressed="true"] { border-color: var(--gold); }
 .swatch-dot { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(128,128,128,0.4); }
-
-/* Free trial and unlock */
-.trial-banner { display: flex; align-items: center; gap: 12px; border-color: var(--gold); }
-.trial-banner p { margin: 0; flex: 1; }
-.trial-banner .pill { flex: none; }
-#trial-card { border-color: var(--gold); }
-#trial-card p { margin: 0 0 10px; }
-body.locked { overflow: hidden; }
-.lock {
-  position: fixed; inset: 0; z-index: 100;
-  background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px 16px;
-  overflow-y: auto;
-}
-.lock-box {
-  max-width: 420px; width: 100%;
-  background: var(--card); border: 1px solid var(--gold); border-radius: 16px;
-  padding: 24px 20px; text-align: center;
-}
-.lock-box h2 { color: var(--gold); font-size: 1.25rem; margin: 0 0 12px; }
-.lock-box p { margin: 0 0 12px; }
-.lock-box #lock-buy { margin: 6px 0 10px; }
